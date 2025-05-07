@@ -1,39 +1,45 @@
-/ In index.html aufgerufen:
-function startCountdown(seconds) {
-  window.location.href = `countdown.html?timer=${seconds}`;
-}
-
-// In countdown.html automatisch aufgerufen, sobald das Skript geladen wird:
-document.addEventListener('DOMContentLoaded', () => {
-  const timerEl = document.getElementById('timer');
-  if (!timerEl) return;  // Nur auf der Countdown-Seite aktiv
-
-  // Timer-Wert aus der URL holen
-  const urlParams = new URLSearchParams(window.location.search);
-  let remaining = parseInt(urlParams.get('timer'), 10);
-  if (isNaN(remaining) || remaining < 0) {
-    // Fehlerfall: direkt weiterleiten
-    window.location.href = 'vortrag-teil1.html';
+// ------------------------------------------------------
+// Globale Funktion für die Startseite
+// ------------------------------------------------------
+window.startCountdown = function(seconds) {
+  // Noch einmal kurz prüfen, dass seconds eine Zahl ist
+  if (isNaN(seconds) || seconds < 0) {
+    console.error("Ungültiger Countdown-Wert:", seconds);
     return;
   }
+  // Weiterleiten auf die Countdown-Seite mit Parameter
+  window.location.href = `countdown.html?timer=${seconds}`;
+};
 
-  // Anzeigeformat mm:ss
-  function format(mmss) {
-    const m = Math.floor(mmss / 60).toString().padStart(2, '0');
-    const s = (mmss % 60).toString().padStart(2, '0');
-    return `${m}:${s}`;
+// ------------------------------------------------------
+// Countdown-Logik für countdown.html
+// ------------------------------------------------------
+document.addEventListener('DOMContentLoaded', () => {
+  const timerEl = document.getElementById('timer');
+  if (!timerEl) return; // nur ausführen auf countdown.html
+
+  const params = new URLSearchParams(window.location.search);
+  let remaining = parseInt(params.get('timer'), 10);
+  if (isNaN(remaining) || remaining < 0) {
+    return window.location.href = 'vortrag-teil1.html';
   }
 
-  // Countdown starten
+  // Sekunden in mm:ss umwandeln
+  const format = secs => {
+    const m = String(Math.floor(secs / 60)).padStart(2, '0');
+    const s = String(secs % 60).padStart(2, '0');
+    return `${m}:${s}`;
+  };
+
   timerEl.textContent = format(remaining);
-  const interval = setInterval(() => {
+  const tick = setInterval(() => {
     remaining--;
     if (remaining <= 0) {
-      clearInterval(interval);
-      // Weiterleitung, wenn Timer abgelaufen
+      clearInterval(tick);
       window.location.href = 'vortrag-teil1.html';
     } else {
       timerEl.textContent = format(remaining);
     }
   }, 1000);
 });
+
