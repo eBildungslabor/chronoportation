@@ -3,30 +3,115 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Vortrag von Nele Hirsch</title>
+  <title>Interaktiver Vortrag – Nele Hirsch</title>
   <link rel="stylesheet" href="css/pico.min.css">
-  <!-- script.js wird mit defer geladen, definiert startCountdown vor dem Rendern -->
-  <script src="script.js" defer></script>
+  <!-- Canvas-Confetti-Bibliothek -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+  <style>
+    /* Einfache Sichtbarkeits-Klasse */
+    .hidden { display: none !important; }
+  </style>
 </head>
 <body>
-  <main class="container" id="mainContainer">
+<main class="container">
+  <!-- 1) Start-Buttons -->
+  <div id="initialContainer">
     <h1>Wann soll der Vortrag starten?</h1>
+    <button onclick="handleStart(900)">In 15 Minuten</button>
+    <button onclick="handleStart(300)">In 5 Minuten</button>
+    <button onclick="handleStart(180)">In 3 Minuten</button>
+    <button onclick="handleStart(60)">In 1 Minute</button>
+    <button onclick="handleStart(0)">Sofort</button>
+  </div>
 
-    <button type="button" onclick="startCountdown(900)">
-      In 15 Minuten
-    </button>
-    <button type="button" onclick="startCountdown(300)">
-      In 5 Minuten
-    </button>
-    <button type="button" onclick="startCountdown(180)">
-      In 3 Minuten
-    </button>
-    <button type="button" onclick="startCountdown(60)">
-      In 1 Minute
-    </button>
-    <button type="button" onclick="location.href='vortrag-teil1.html'">
-      Sofort
-    </button>
-  </main>
+  <!-- 2) Countdown -->
+  <div id="countdownContainer" class="hidden">
+    <h1>Chrono-Präsentation von Nele startet in:</h1>
+    <h2 id="timer">--:--</h2>
+    <p><strong>Thema heute:</strong> KI in Bildung, Beruf und Gesellschaft</p>
+    <p>Du willst dich schon vorab zu Nele informieren?  
+      <a href="https://ebildungslabor.de" target="_blank">ebildungslabor.de</a>
+    </p>
+    <img 
+      src="https://chart.googleapis.com/chart?chs=150x150&cht=qr&chl=https://ebildungslabor.de"
+      alt="QR-Code zur eBildungslabor-Website">
+  </div>
+
+  <!-- 3) Video -->
+  <div id="videoContainer" class="hidden">
+    <h1>Vortrag Teil 1: KI in Bildung, Beruf und Gesellschaft</h1>
+    <video
+      id="vortragVideo"
+      src="vortrag1.mp4"
+      controls
+      playsinline
+      style="width:100%;max-width:800px;"
+    >
+      Dein Browser unterstützt das Video-Tag nicht.
+    </video>
+  </div>
+</main>
+
+<script>
+  // 1) Wird aufgerufen, wenn Nutzer einen Button klickt
+  function handleStart(seconds) {
+    // Buttons ausblenden
+    document.getElementById('initialContainer').classList.add('hidden');
+
+    // Wenn Sekunden > 0 → Countdown, sonst direkt Video
+    if (seconds > 0) {
+      startCountdown(seconds);
+    } else {
+      showVideo();
+    }
+  }
+
+  // 2) Countdown-Routine
+  function startCountdown(seconds) {
+    const cd = document.getElementById('countdownContainer');
+    const timerEl = document.getElementById('timer');
+    cd.classList.remove('hidden');
+
+    let remaining = seconds;
+    timerEl.textContent = formatTime(remaining);
+
+    const tick = setInterval(() => {
+      remaining--;
+      if (remaining <= 0) {
+        clearInterval(tick);
+        cd.classList.add('hidden');
+        showVideo();
+      } else {
+        timerEl.textContent = formatTime(remaining);
+      }
+    }, 1000);
+  }
+
+  // Hilfsfunktion: mm:ss
+  function formatTime(secs) {
+    const m = String(Math.floor(secs / 60)).padStart(2, '0');
+    const s = String(secs % 60).padStart(2, '0');
+    return `${m}:${s}`;
+  }
+
+  // 3) Video starten + Konfetti
+  function showVideo() {
+    const vidC = document.getElementById('videoContainer');
+    const video = document.getElementById('vortragVideo');
+    vidC.classList.remove('hidden');
+
+    // Video starten (erlaubt, weil vorher ein Klick stattgefunden hat)
+    video.play().catch(err => {
+      console.warn('Autoplay blockiert? Bitte manuell klicken.', err);
+    });
+
+    // Konfetti abfeuern
+    confetti({
+      particleCount: 250,
+      spread: 70,
+      origin: { y: 0.6 }
+    });
+  }
+</script>
 </body>
 </html>
