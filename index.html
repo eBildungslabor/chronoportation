@@ -1,20 +1,32 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta charset="UTF-8">
-  <link rel="stylesheet" href="css/pico.min.css">
-  <script src="script.js" defer></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Vortrag von Nele Hirsch</title>
+  <link rel="stylesheet" href="css/pico.min.css">
+  <!-- script.js wird mit defer geladen, definiert startCountdown vor dem Rendern -->
+  <script src="script.js" defer></script>
 </head>
 <body>
   <main class="container" id="mainContainer">
     <h1>Wann soll der Vortrag starten?</h1>
-    <input type="button" value="In 15 Minuten" onclick="startCountdown(900)">
-    <input type="button" value="In 5 Minuten"  onclick="startCountdown(300)">
-    <input type="button" value="In 3 Minuten"  onclick="startCountdown(180)">
-    <input type="button" value="In 1 Minute"   onclick="startCountdown(60)">
-    <input type="button" value="Sofort"         onclick="location.href='vortrag-teil1.html'">
+
+    <button type="button" onclick="startCountdown(900)">
+      In 15 Minuten
+    </button>
+    <button type="button" onclick="startCountdown(300)">
+      In 5 Minuten
+    </button>
+    <button type="button" onclick="startCountdown(180)">
+      In 3 Minuten
+    </button>
+    <button type="button" onclick="startCountdown(60)">
+      In 1 Minute
+    </button>
+    <button type="button" onclick="location.href='vortrag-teil1.html'">
+      Sofort
+    </button>
   </main>
 </body>
 </html>
