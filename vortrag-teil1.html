@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vortrag Teil 1 – Nele Hirsch</title>
+  <link rel="stylesheet" href="css/pico.min.css">
+</head>
+<body>
+  <main class="container" id="mainContainer">
+    <h1>Vortrag Teil 1: KI in Bildung, Beruf und Gesellschaft</h1>
+    <video
+      id="vortragVideo"
+      src="vortrag1.mp4"
+      autoplay
+      controls
+      style="width: 100%; max-width: 800px;"
+    >
+      Dein Browser unterstützt das Video-Tag nicht.
+    </video>
+  </main>
+
+  <script>
+  (() => {
+    "use strict";
+
+    // Hilfsfunktionen
+    const Utils = {
+      parsePx: (value) => parseFloat(value.replace(/px/, "")),
+      getRandomInRange: (min, max, precision = 0) => {
+        const mult = Math.pow(10, precision);
+        return Math.floor((Math.random() * (max - min) + min) * mult) / mult;
+      },
+      getRandomItem: (arr) => arr[Math.floor(Math.random() * arr.length)],
+      getScaleFactor: () => Math.log(window.innerWidth) / Math.log(1920),
+      debounce: (fn, delay) => {
+        let t;
+        return (...args) => {
+          clearTimeout(t);
+          t = setTimeout(() => fn(...args), delay);
+        };
+      },
+    };
+
+    const DEG_TO_RAD = Math.PI / 180;
+    const defaultConfettiConfig = {
+      confettiesNumber: 250,
+      confettiRadius: 6,
+      confettiColors: [
+        "#fcf403", "#62fc03", "#f4fc03", "#03e7fc",
+        "#03fca5", "#a503fc", "#fc03ad", "#fc03c2"
+      ],
+      emojies: [],
+      svgIcon: null,
+    };
+
+    class Confetti {
+      constructor({ initialPosition, direction, radius, colors, emojis, svgIcon }) {
+        const speedF = Utils.getRandomInRange(0.9, 1.7, 3) * Utils.getScaleFactor();
+        this.speed = { x: speedF, y: speedF };
+        this.finalSpeedX = Utils.getRandomInRange(0.2, 0.6, 3);
+        this.rotationSpeed = emojis.length || svgIcon
+          ? 0.01
+          : Utils.getRandomInRange(0.03, 0.07, 3) * Utils.getScaleFactor();
+        this.dragCoefficient = Utils.getRandomInRange(0.0005, 0.0009, 6);
+        this.radius = { x: radius, y: radius };
+        this.initialRadius = radius;
+        this.rotationAngle = direction === "left"
+          ? Utils.getRandomInRange(0, 0.2, 3)
+          : Utils.getRandomInRange(-0.2, 0, 3);
+        this.emojiRotationAngle = Utils.getRandomInRange(0, 2 * Math.PI);
+        this.radiusYDirection = "down";
+
+        const angle = direction === "left"
+          ? Utils.getRandomInRange(82, 15) * DEG_TO_RAD
+          : Utils.getRandomInRange(-15, -82) * DEG_TO_RAD;
+        this.absCos = Math.abs(Math.cos(angle));
+        this.absSin = Math.abs(Math.sin(angle));
+
+        const offset = Utils.getRandomInRange(-150, 0);
+        const pos = {
+          x: initialPosition.x + (direction === "left" ? -offset : offset) * this.absCos,
+          y: initialPosition.y - offset * this.absSin
+        };
+        this.position = { ...pos };
+        this.initialPosition = { ...pos };
+        this.color = emojis.length || svgIcon
+          ? null
+          : Utils.getRandomItem(colors);
+        this.emoji = emojis.length
+          ? Utils.getRandomItem(emojis)
+          : null;
+        this.svgIcon = null;
+
+        if (svgIcon) {
+          this.svgImage = new Image();
+          this.svgImage.src = svgIcon;
+          this.svgImage.onload = () => { this.svgIcon = this.svgImage; };
+        }
+
+        this.createdAt = Date.now();
+        this.direction = direction;
+      }
+
+      draw(ctx) {
+        const { x, y } = this.position;
+        const { x: rx, y: ry } = this.radius;
+        const scale = window.devicePixelRatio;
+
+        if (this.svgIcon) {
+          ctx.save();
+          ctx.translate(scale * x, scale * y);
+          ctx.rotate(this.emojiRotationAngle);
+          ctx.drawImage(this.svgIcon, -rx, -ry, rx * 2, ry * 2);
+          ctx.restore();
+        } else if (this.color) {
+          ctx.fillStyle = this.color;
+          ctx.beginPath();
+          ctx.ellipse(x * scale, y * scale, rx * scale, ry * scale, this.rotationAngle, 0, 2 * Math.PI);
+          ctx.fill();
+        } else if (this.emoji) {
+          ctx.font = `${rx * scale}px serif`;
+          ctx.save();
+          ctx.translate(scale * x, scale * y);
+          ctx.rotate(this.emojiRotationAngle);
+          ctx.textAlign = "center";
+          ctx.fillText(this.emoji, 0, ry / 2);
+          ctx.restore();
+        }
+      }
+
+      updatePosition(dt, now) {
+        const elapsed = now - this.createdAt;
+        if (this.speed.x > this.finalSpeedX) {
+          this.speed.x -= this.dragCoefficient * dt;
+        }
+        this.position.x += this.speed.x * (this.direction === "left" ? -this.absCos : this.absCos) * dt;
+        this.position.y = this.initialPosition.y - this.speed.y * this.absSin * elapsed + 0.00125 * (elapsed ** 2) / 2;
+
+        if (!this.emoji && !this.svgIcon) {
+          this.rotationSpeed = Math.max(this.rotationSpeed - 1e-5 * dt, 0);
+          if (this.radiusYDirection === "down") {
+            this.radius.y -= dt * this.rotationSpeed;
+            if (this.radius.y <= 0) {
+              this.radius.y = 0;
+              this.radiusYDirection = "up";
+            }
+          } else {
+            this.radius.y += dt * this.rotationSpeed;
+            if (this.radius.y >= this.initialRadius) {
+              this.radius.y = this.initialRadius;
+              this.radiusYDirection = "down";
+            }
+          }
+        }
+      }
+
+      isVisible(canvasH) {
+        return this.position.y < canvasH + 100;
+      }
+    }
+
+    class ConfettiManager {
+      constructor() {
+        this.canvas = document.createElement("canvas");
+        Object.assign(this.canvas.style, {
+          position: "fixed",
+          top: 0, left: 0,
+          width: "100%", height: "100%",
+          zIndex: 1000,
+          pointerEvents: "none"
+        });
+        document.body.appendChild(this.canvas);
+        this.ctx = this.canvas.getContext("2d");
+        this.confetti = [];
+        this.lastTime = Date.now();
+        window.addEventListener("resize", Utils.debounce(() => this.resize(), 200));
+        this.resize();
+        requestAnimationFrame(() => this.loop());
+      }
+
+      resize() {
+        this.canvas.width  = window.innerWidth  * window.devicePixelRatio;
+        this.canvas.height = window.innerHeight * window.devicePixelRatio;
+      }
+
+      addConfetti(config = {}) {
+        const cfg = { ...defaultConfettiConfig, ...config };
+        const baseY = (5 * window.innerHeight) / 7;
+        for (let i = 0; i < cfg.confettiesNumber / 2; i++) {
+          this.confetti.push(new Confetti({
+            initialPosition: { x: 0, y: baseY },
+            direction: "right",
+            radius: cfg.confettiRadius,
+            colors: cfg.confettiColors,
+            emojis: cfg.emojies,
+            svgIcon: cfg.svgIcon,
+          }));
+          this.confetti.push(new Confetti({
+            initialPosition: { x: window.innerWidth, y: baseY },
+            direction: "left",
+            radius: cfg.confettiRadius,
+            colors: cfg.confettiColors,
+            emojis: cfg.emojies,
+            svgIcon: cfg.svgIcon,
+          }));
+        }
+      }
+
+      resetAndStart(config = {}) {
+        this.confetti = [];
+        this.addConfetti(config);
+      }
+
+      loop() {
+        const now = Date.now();
+        const dt = now - this.lastTime;
+        this.lastTime = now;
+
+        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        this.confetti = this.confetti.filter(c => {
+          c.updatePosition(dt, now);
+          c.draw(this.ctx);
+          return c.isVisible(this.canvas.height);
+        });
+
+        requestAnimationFrame(() => this.loop());
+      }
+    }
+
+    // Manager global machen
+    const manager = new ConfettiManager();
+    window.confettiManager = manager;
+  })();
+
+  // Bei Video-Start das Konfetti auslösen
+  document.getElementById('vortragVideo').addEventListener('play', () => {
+    window.confettiManager.resetAndStart();
+  });
+  </script>
+</body>
+</html>
