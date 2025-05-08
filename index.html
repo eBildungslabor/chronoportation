@@ -2,116 +2,147 @@
 <html lang="de">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Interaktiver Vortrag – Nele Hirsch</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Interaktive Präsentation – Nele Hirsch</title>
   <link rel="stylesheet" href="css/pico.min.css">
-  <!-- Canvas-Confetti-Bibliothek -->
+  <link rel="stylesheet" href="css/styles.css">
+  <!-- Canvas-Confetti für später -->
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
-  <style>
-    /* Einfache Sichtbarkeits-Klasse */
-    .hidden { display: none !important; }
-  </style>
+  <script src="script.js" defer></script>
 </head>
 <body>
 <main class="container">
-  <!-- 1) Start-Buttons -->
-  <div id="initialContainer">
+  
+  <!-- STARTSEKTION -->
+  <section id="startSection" class="section active">
     <h1>Wann soll der Vortrag starten?</h1>
-    <button onclick="handleStart(900)">In 15 Minuten</button>
-    <button onclick="handleStart(300)">In 5 Minuten</button>
-    <button onclick="handleStart(180)">In 3 Minuten</button>
-    <button onclick="handleStart(60)">In 1 Minute</button>
-    <button onclick="handleStart(0)">Sofort</button>
-  </div>
+    <div class="button-group">
+      <button onclick="goTo(‘countdown’, 900)">In 15 Min</button>
+      <button onclick="goTo(‘countdown’, 300)">In 5 Min</button>
+      <button onclick="goTo(‘countdown’, 180)">In 3 Min</button>
+      <button onclick="goTo(‘countdown’, 60)">In 1 Min</button>
+      <button onclick="goTo(‘hallo’)">Sofort</button>
+    </div>
+  </section>
+  
+  <!-- COUNTDOWN-SEKTION -->
+  <section id="countdownSection" class="section">
+    <h1>Chrono-Präsentation startet in:</h1>
+    <div class="overlay active">
+      <div>
+        <div id="countdownTimer" class="timer">00:00</div>
+        <p><strong>Thema heute:</strong> KI in Bildung, Beruf und Gesellschaft</p>
+        <p>Info: <a href="https://ebildungslabor.de" target="_blank">ebildungslabor.de</a></p>
+        <img src="https://chart.googleapis.com/chart?chs=150x150&cht=qr&chl=https://ebildungslabor.de"
+             alt="QR-Code" class="qr-code">
+      </div>
+    </div>
+  </section>
+  
+  <!-- 1. HALLO-SEKTION -->
+  <section id="halloSection" class="section">
+    <div class="video-wrapper">
+      <video id="video1" src="video1.mp4" playsinline></video>
+    </div>
+    <!-- Overlay für Zeit & Ort -->
+    <div id="halloOverlay" class="overlay">
+      <div>
+        <h1 id="currentTime">00:00</h1>
+        <p id="currentLocation">Ort: …</p>
+      </div>
+    </div>
+  </section>
+  
+  <!-- 2. EINSTIEG-SEKTION -->
+  <section id="einstiegSection" class="section">
+    <div class="video-wrapper">
+      <video id="video4" src="video4.mp4" playsinline></video>
+    </div>
+    <!-- Aufgaben-Overlay mit 5-Min-Countdown -->
+    <div id="einstiegOverlay" class="overlay">
+      <div>
+        <h1>Aufgabe:</h1>
+        <p>Wie definiert ihr KI?</p>
+        <div id="einstiegTimer" class="timer">05:00</div>
+      </div>
+    </div>
+  </section>
+  
+  <!-- 3. IMPULS-SEKTION -->
+  <section id="impulsSection" class="section">
+    <div class="video-wrapper">
+      <video id="video5" src="video5.mp4" playsinline></video>
+    </div>
+    <!-- Aufgaben-Overlay mit 5-Min-Countdown -->
+    <div id="impulsOverlay" class="overlay">
+      <div>
+        <h1>Aufgabe:</h1>
+        <p>Sucht Euch eine These und bearbeitet sie!</p>
+        <div id="impulsTimer" class="timer">05:00</div>
+      </div>
+    </div>
+  </section>
+  
+  <!-- 4. VORSTELLUNG-SEKTION -->
+  <section id="vorstellungSection" class="section">
+    <div class="video-wrapper">
+      <video id="video6" src="video6.mp4" playsinline></video>
+    </div>
+    <!-- Drei aufeinanderfolgende Texteinblendungen -->
+    <div id="vorstellungOverlay" class="overlay">
+      <div id="vorstellungStep1" class="step">
+        <p>Erste Person bitte bereit machen</p>
+        <div class="timer">00:15</div>
+      </div>
+      <div id="vorstellungStep2" class="step">
+        <p>Erste Vorstellung!</p>
+        <div class="timer">01:00</div>
+      </div>
+      <div id="vorstellungStep3" class="step">
+        <p>Zweite Person bitte bereit machen</p>
+        <div class="timer">00:15</div>
+      </div>
+      <div id="vorstellungStep4" class="step">
+        <p>Zweite Vorstellung!</p>
+        <div class="timer">01:00</div>
+      </div>
+      <div id="vorstellungStep5" class="step">
+        <p>Dritte Person bitte bereit machen</p>
+        <div class="timer">00:15</div>
+      </div>
+      <div id="vorstellungStep6" class="step">
+        <p>Dritte Vorstellung!</p>
+        <div class="timer">01:00</div>
+      </div>
+    </div>
+  </section>
+  
+  <!-- 5. ABSCHLUSS-SEKTION -->
+  <section id="abschlussSection" class="section">
+    <div class="video-wrapper">
+      <video id="video7" src="video7.mp4" playsinline></video>
+    </div>
+    <!-- Abschluss-Overlay -->
+    <div id="abschlussOverlay" class="overlay">
+      <div>
+        <h1>Danke & Feedback</h1>
+        <p>Gib uns gerne Rückmeldung!</p>
+        <img src="https://chart.googleapis.com/chart?chs=150x150&cht=qr&chl=https://feedback.example.com"
+             alt="QR-Code Feedback" class="qr-code">
+      </div>
+    </div>
+  </section>
+  
+  <!-- FOOTER-NAVIGATION -->
+  <nav class="footer-nav">
+    <button onclick="activateSection('startSection')" id="navStart">Start</button>
+    <button onclick="activateSection('halloSection')" id="navHallo">Hallo</button>
+    <button onclick="activateSection('einstiegSection')" id="navEinstieg">Einstieg</button>
+    <button onclick="activateSection('impulsSection')" id="navImpuls">Impuls</button>
+    <button onclick="activateSection('vorstellungSection')" id="navVorstellung">Vorstellung</button>
+    <button onclick="activateSection('abschlussSection')" id="navAbschluss">Abschluss</button>
+  </nav>
 
-  <!-- 2) Countdown -->
-  <div id="countdownContainer" class="hidden">
-    <h1>Chrono-Präsentation von Nele startet in:</h1>
-    <h2 id="timer">--:--</h2>
-    <p><strong>Thema heute:</strong> KI in Bildung, Beruf und Gesellschaft</p>
-    <p>Du willst dich schon vorab zu Nele informieren?  
-      <a href="https://ebildungslabor.de" target="_blank">ebildungslabor.de</a>
-    </p>
-    <img 
-      src="https://chart.googleapis.com/chart?chs=150x150&cht=qr&chl=https://ebildungslabor.de"
-      alt="QR-Code zur eBildungslabor-Website">
-  </div>
-
-  <!-- 3) Video -->
-  <div id="videoContainer" class="hidden">
-    <h1>Vortrag Teil 1: KI in Bildung, Beruf und Gesellschaft</h1>
-    <video
-      id="vortragVideo"
-      src="vortrag1.mp4"
-      controls
-      playsinline
-      style="width:100%;max-width:800px;"
-    >
-      Dein Browser unterstützt das Video-Tag nicht.
-    </video>
-  </div>
 </main>
-
-<script>
-  // 1) Wird aufgerufen, wenn Nutzer einen Button klickt
-  function handleStart(seconds) {
-    // Buttons ausblenden
-    document.getElementById('initialContainer').classList.add('hidden');
-
-    // Wenn Sekunden > 0 → Countdown, sonst direkt Video
-    if (seconds > 0) {
-      startCountdown(seconds);
-    } else {
-      showVideo();
-    }
-  }
-
-  // 2) Countdown-Routine
-  function startCountdown(seconds) {
-    const cd = document.getElementById('countdownContainer');
-    const timerEl = document.getElementById('timer');
-    cd.classList.remove('hidden');
-
-    let remaining = seconds;
-    timerEl.textContent = formatTime(remaining);
-
-    const tick = setInterval(() => {
-      remaining--;
-      if (remaining <= 0) {
-        clearInterval(tick);
-        cd.classList.add('hidden');
-        showVideo();
-      } else {
-        timerEl.textContent = formatTime(remaining);
-      }
-    }, 1000);
-  }
-
-  // Hilfsfunktion: mm:ss
-  function formatTime(secs) {
-    const m = String(Math.floor(secs / 60)).padStart(2, '0');
-    const s = String(secs % 60).padStart(2, '0');
-    return `${m}:${s}`;
-  }
-
-  // 3) Video starten + Konfetti
-  function showVideo() {
-    const vidC = document.getElementById('videoContainer');
-    const video = document.getElementById('vortragVideo');
-    vidC.classList.remove('hidden');
-
-    // Video starten (erlaubt, weil vorher ein Klick stattgefunden hat)
-    video.play().catch(err => {
-      console.warn('Autoplay blockiert? Bitte manuell klicken.', err);
-    });
-
-    // Konfetti abfeuern
-    confetti({
-      particleCount: 250,
-      spread: 70,
-      origin: { y: 0.6 }
-    });
-  }
-</script>
 </body>
 </html>
