@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
-  let runThrough = false;
+  let runThrough = false;           // Steuerung: Flow (true) vs. manuelle Navi (false)
   const sections = document.querySelectorAll('.section');
   const navButtons = {
     startSection:       document.getElementById('navStart'),
@@ -10,36 +10,50 @@ document.addEventListener('DOMContentLoaded', () => {
     abschlussSection:   document.getElementById('navAbschluss')
   };
 
-  // Aufruf durch Start-Buttons
-  window.goTo = (target, seconds) => {
-    runThrough = (target === 'countdown');
-    if (target === 'countdown') {
-      activateRaw('startSection', 'countdownSection');
-      startCountdown(seconds);
+  // 1) Aufruf aus Start-Buttons
+  window.startPresentation = seconds => {
+    runThrough = (seconds > 0);
+    // Umschalten: Auswahl verstecken, Countdown einblenden (nur im Start-Section)
+    document.getElementById('selectionContainer').style.display = 'none';
+    document.getElementById('countdownContainer').classList.add('active');
+
+    if (seconds > 0) {
+      startCountdown(seconds, () => {
+        // nach Countdown direkt in „Hallo“
+        activateSection('halloSection');
+        startSectionSequence('halloSection');
+      });
     } else {
-      activateSection(target + 'Section');
+      // ohne Countdown direkt „Hallo“
+      activateSection('halloSection');
+      startSectionSequence('halloSection');
     }
   };
 
-  // Aufruf durch Footer-Navi
-  window.activateSection = (sectionId) => {
-    runThrough = false;
-    activateRaw(null, sectionId);
+  // 2) Footer-Navigation
+  window.activateSection = sectionId => {
+    runThrough = false;                  // manuelles Springen bricht Flow ab
+    showSection(sectionId);
+    // beim manuellen Springen startet der Bereich sofort:
     startSectionSequence(sectionId);
   };
 
-  // Sektion zeigen / Footer-Button highlighten
-  function activateRaw(fromId, toId) {
+  // allgemeines Umschalten & Button-Highlight
+  function showSection(id) {
     sections.forEach(s => s.classList.remove('active'));
     Object.values(navButtons).forEach(b => b.classList.remove('active'));
-    if (fromId) document.getElementById(fromId).classList.remove('active');
-    const sec = document.getElementById(toId);
-    sec.classList.add('active');
-    if (navButtons[toId]) navButtons[toId].classList.add('active');
+    document.getElementById(id).classList.add('active');
+    if (navButtons[id]) navButtons[id].classList.add('active');
+
+    // Falls wir zurück auf Start springen: Rücksetzen
+    if (id === 'startSection') {
+      document.getElementById('selectionContainer').style.display = '';
+      document.getElementById('countdownContainer').classList.remove('active');
+    }
   }
 
-  // Countdown-Logik
-  function startCountdown(seconds) {
+  // 3) Countdown
+  function startCountdown(seconds, onEnd) {
     let rem = seconds;
     const el = document.getElementById('countdownTimer');
     el.textContent = formatTime(rem);
@@ -47,100 +61,75 @@ document.addEventListener('DOMContentLoaded', () => {
       rem--;
       if (rem <= 0) {
         clearInterval(iv);
-        activateRaw('countdownSection', 'halloSection');
-        startSectionSequence('halloSection');
+        onEnd();
       } else {
         el.textContent = formatTime(rem);
       }
     }, 1000);
   }
 
-  // Hauptsequenz je Sektion
-  function startSectionSequence(id) {
-    switch (id) {
-      case 'halloSection':       handleHalloSection(); break;
-      case 'einstiegSection':    handleEinstiegSection(); break;
-      case 'impulsSection':      handleImpulsSection(); break;
-      case 'vorstellungSection': handleVorstellungSection(); break;
-      case 'abschlussSection':   handleAbschlussSection(); break;
+  // 4) Bereichs-Sequenz
+  function startSectionSequence(sectionId) {
+    switch (sectionId) {
+      case 'halloSection':       handleHallo();       break;
+      case 'einstiegSection':    handleEinstieg();    break;
+      case 'impulsSection':      handleImpuls();      break;
+      case 'vorstellungSection': handleVorstellung(); break;
+      case 'abschlussSection':   handleAbschluss();   break;
       default: break;
     }
   }
 
-  // === HALLO (1) ===
-  function handleHalloSection() {
+  // --- 4.1 HALLO ---
+  function handleHallo() {
     const wrap = document.querySelector('#halloSection .video-wrapper');
-    const ov   = document.getElementById('halloOverlay');
     wrap.innerHTML = '';
 
-    // a) Video1 + Konfetti + Overlay
+    // a) Video1
     const v1 = document.createElement('video');
     v1.src = 'video1.mp4';
     v1.playsInline = true;
     wrap.appendChild(v1);
     v1.play().catch(() => {});
+
+    // Konfetti beim Start
     confetti({ particleCount: 250, spread: 70, origin: { y: 0.6 } });
-    document.getElementById('currentTime').textContent     = new Date().toLocaleTimeString();
-    document.getElementById('currentLocation').textContent = 'Ort: Berlin, Deutschland';
-    ov.classList.add('active');
 
-    // b) nach 15s Overlay aus + Video2
-    setTimeout(() => {
-      ov.classList.remove('active');
-      playVideo2();
-    }, 15000);
-  }
-
-  function playVideo2() {
-    const wrap = document.querySelector('#halloSection .video-wrapper');
-    wrap.innerHTML = '';
-    const v2 = document.createElement('video');
-    v2.src = 'video2.mp4';
-    v2.playsInline = true;
-    wrap.appendChild(v2);
-    v2.play().catch(() => {});
-    v2.onended = showIframeThenVideo3;
-  }
-
-  function showIframeThenVideo3() {
-    const sec = document.getElementById('halloSection');
-    const ov  = document.createElement('div');
-    ov.className = 'overlay active';
-    ov.innerHTML = '<iframe src="#" class="iframe-placeholder"></iframe>';
-    sec.appendChild(ov);
-
-    setTimeout(() => {
-      ov.remove();
-      playVideo3WithFade();
-    }, 5000);
-  }
-
-  function playVideo3WithFade() {
-    const wrap = document.querySelector('#halloSection .video-wrapper');
-    wrap.innerHTML = '';
-    wrap.style.opacity = 0;
-    wrap.style.transition = 'opacity 1s';
-
-    const v3 = document.createElement('video');
-    v3.src = 'video3.mp4';
-    v3.playsInline = true;
-    wrap.appendChild(v3);
-
-    requestAnimationFrame(() => wrap.style.opacity = 1);
-    v3.play().catch(() => {});
-    v3.onended = () => {
-      wrap.style.opacity = 0;
-      wrap.ontransitionend = () => {
-        if (runThrough) {
-          activateRaw('halloSection', 'einstiegSection');
-          startSectionSequence('einstiegSection');
-        }
-      };
+    // b) Nach Ende Video1 → Ortseinblendung 15s
+    v1.onended = () => {
+      showLocation(() => {
+        // c) Video2
+        const v2 = document.createElement('video');
+        wrap.innerHTML = '';
+        v2.src = 'video2.mp4';
+        v2.playsInline = true;
+        wrap.appendChild(v2);
+        v2.play().catch(() => {});
+        // d) nach Ende → weiter im Flow
+        v2.onended = () => {
+          if (runThrough) {
+            activateSection('einstiegSection');
+            startSectionSequence('einstiegSection');
+          }
+        };
+      });
     };
   }
 
-  // === EINSTIEG (2) ===
-  function handleEinstiegSection() {
+  // Location-Screen für 15 Sekunden
+  function showLocation(onDone) {
+    showSection('halloSection');
+    const txt = document.getElementById('halloSection')
+                  .querySelector('h1, p, video-wrapper')
+                  || document.querySelector('#locationText');
+    // wir wechseln hier nur visuell – deshalb ein Delay
+    setTimeout(() => {
+      onDone();
+    }, 15000);
+  }
+
+  // --- 4.2 EINSTIEG ---
+  function handleEinstieg() {
     const wrap = document.querySelector('#einstiegSection .video-wrapper');
     wrap.innerHTML = '';
     const v4 = document.createElement('video');
@@ -149,17 +138,17 @@ document.addEventListener('DOMContentLoaded', () => {
     wrap.appendChild(v4);
     v4.play().catch(() => {});
     v4.onended = () => {
-      showAufgabeOverlay('einstiegOverlay', 300, () => {
+      showTimerOverlay('einstiegSection', 'Wie definiert ihr KI?', 300, () => {
         if (runThrough) {
-          activateRaw('einstiegSection', 'impulsSection');
+          activateSection('impulsSection');
           startSectionSequence('impulsSection');
         }
       });
     };
   }
 
-  // === IMPULS (3) ===
-  function handleImpulsSection() {
+  // --- 4.3 IMPULS ---
+  function handleImpuls() {
     const wrap = document.querySelector('#impulsSection .video-wrapper');
     wrap.innerHTML = '';
     const v5 = document.createElement('video');
@@ -168,37 +157,44 @@ document.addEventListener('DOMContentLoaded', () => {
     wrap.appendChild(v5);
     v5.play().catch(() => {});
     v5.onended = () => {
-      showAufgabeOverlay('impulsOverlay', 300, () => {
+      showTimerOverlay('impulsSection', 'Sucht Euch eine These und bearbeitet sie!', 300, () => {
         if (runThrough) {
-          activateRaw('impulsSection', 'vorstellungSection');
+          activateSection('vorstellungSection');
           startSectionSequence('vorstellungSection');
         }
       });
     };
   }
 
-  // generischer Aufgaben-Overlay
-  function showAufgabeOverlay(id, secs, done) {
-    const ov = document.getElementById(id);
-    const tm = ov.querySelector('.timer');
-    let r = secs;
-    tm.textContent = formatTime(r);
-    ov.classList.add('active');
+  // Universelle Aufgaben-Einblendung
+  function showTimerOverlay(sectionId, text, secs, done) {
+    showSection(sectionId);
+    const ov = document.createElement('div');
+    ov.className = 'overlay active';
+    ov.innerHTML = `
+      <div>
+        <h1>Aufgabe:</h1>
+        <p>${text}</p>
+        <div class="timer">${formatTime(secs)}</div>
+      </div>`;
+    document.getElementById(sectionId).appendChild(ov);
 
+    let rem = secs;
+    const tm = ov.querySelector('.timer');
     const iv = setInterval(() => {
-      r--;
-      tm.textContent = formatTime(r);
-      if (r <= 30) tm.classList.add('countdown-large','blink');
-      if (r <= 0) {
+      rem--;
+      tm.textContent = formatTime(rem);
+      if (rem <= 30) tm.classList.add('countdown-large','blink');
+      if (rem <= 0) {
         clearInterval(iv);
-        ov.classList.remove('active');
+        ov.remove();
         done();
       }
     }, 1000);
   }
 
-  // === VORSTELLUNG (4) ===
-  function handleVorstellungSection() {
+  // --- 4.4 VORSTELLUNG ---
+  function handleVorstellung() {
     const wrap = document.querySelector('#vorstellungSection .video-wrapper');
     wrap.innerHTML = '';
     const v6 = document.createElement('video');
@@ -208,39 +204,44 @@ document.addEventListener('DOMContentLoaded', () => {
     v6.play().catch(() => {});
     v6.onended = () => {
       runOverlaySteps([
-        { id: 'vorstellungStep1', secs: 15 },
-        { id: 'vorstellungStep2', secs: 60 },
-        { id: 'vorstellungStep3', secs: 15 },
-        { id: 'vorstellungStep4', secs: 60 },
-        { id: 'vorstellungStep5', secs: 15 },
-        { id: 'vorstellungStep6', secs: 60 }
+        { text: 'Erste Person bitte bereit machen', secs: 15 },
+        { text: 'Erste Vorstellung!', secs: 60 },
+        { text: 'Zweite Person bitte bereit machen', secs: 15 },
+        { text: 'Zweite Vorstellung!', secs: 60 },
+        { text: 'Dritte Person bitte bereit machen', secs: 15 },
+        { text: 'Dritte Vorstellung!', secs: 60 }
       ], () => {
         if (runThrough) {
-          activateRaw('vorstellungSection', 'abschlussSection');
+          activateSection('abschlussSection');
           startSectionSequence('abschlussSection');
         }
       });
     };
   }
 
-  function runOverlaySteps(steps, allDone) {
+  function runOverlaySteps(steps, done) {
     let i = 0;
     function next() {
-      if (i > 0) document.getElementById(steps[i-1].id).classList.remove('active');
-      if (i >= steps.length) return allDone();
+      if (i >= steps.length) return done();
       const s = steps[i++];
-      const el = document.getElementById(s.id);
-      const tm = el.querySelector('.timer');
-      let r = s.secs;
-      tm.textContent = formatTime(r);
-      el.classList.add('active');
+      const ov = document.createElement('div');
+      ov.className = 'overlay active';
+      ov.innerHTML = `
+        <div>
+          <p>${s.text}</p>
+          <div class="timer">${formatTime(s.secs)}</div>
+        </div>`;
+      document.getElementById('vorstellungSection').appendChild(ov);
 
+      let rem = s.secs;
+      const tm = ov.querySelector('.timer');
       const iv = setInterval(() => {
-        r--;
-        tm.textContent = formatTime(r);
-        if (r <= (s.secs === 60 ? 60 : 30)) tm.classList.add('countdown-large','blink');
-        if (r <= 0) {
+        rem--;
+        tm.textContent = formatTime(rem);
+        if (rem <= 30) tm.classList.add('countdown-large','blink');
+        if (rem <= 0) {
           clearInterval(iv);
+          ov.remove();
           next();
         }
       }, 1000);
@@ -248,8 +249,8 @@ document.addEventListener('DOMContentLoaded', () => {
     next();
   }
 
-  // === ABSCHLUSS (5) ===
-  function handleAbschlussSection() {
+  // --- 4.5 ABSCHLUSS ---
+  function handleAbschluss() {
     const wrap = document.querySelector('#abschlussSection .video-wrapper');
     wrap.innerHTML = '';
     const v7 = document.createElement('video');
@@ -261,12 +262,11 @@ document.addEventListener('DOMContentLoaded', () => {
       const ov = document.getElementById('abschlussOverlay');
       ov.classList.add('active');
       confetti({ particleCount: 250, spread: 70, origin: { y: 0.6 } });
-      // Applaus: falls du applause.mp3 hinzufügst:
-      // new Audio('applause.mp3').play();
+      // neuer Applaus-Sound hier, falls gewünscht
     };
   }
 
-  // Helfer
+  // Hilfsfunktion mm:ss
   function formatTime(secs) {
     const m = String(Math.floor(secs/60)).padStart(2,'0');
     const s = String(secs%60).padStart(2,'0');
