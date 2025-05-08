@@ -1,4 +1,6 @@
-/* Reset & Basis */
+/* styles.css */
+
+/* 1. Reset & Basis */
 *,
 *::before,
 *::after {
@@ -15,29 +17,33 @@ html, body {
   overflow: hidden;
 }
 
-/* Haupt-Layout */
+/* 2. Haupt-Layout als Grid (Content + Footer) */
 main.container {
   display: grid;
   grid-template-rows: 1fr auto;
   height: 100vh;
-  position: relative;
 }
 
-/* Sektionen */
+/* 3. Sektionen */
 .section {
   grid-row: 1;
   display: none;
   position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
 }
 .section.active {
-  display: block;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
 }
 
-/* Vollbild-Video */
+/* 4. Video-Wrapper */
 .video-wrapper {
-  position: absolute;
-  top: 0; left: 0;
-  width: 100vw; height: 100vh;
+  width: 100%;
+  height: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -49,11 +55,12 @@ main.container {
   object-fit: cover;
 }
 
-/* Overlays für Countdown & Einblendungen */
+/* 5. Overlays (Countdown, Text, Iframe, Ort, Aufgaben) */
 .overlay {
   position: absolute;
   top: 0; left: 0;
-  width: 100vw; height: 100vh;
+  width: 100%;
+  height: 100%;
   background: rgba(0,0,0,0.85);
   display: none;
   align-items: center;
@@ -86,7 +93,7 @@ main.container {
   to { visibility: hidden; }
 }
 
-/* Footer-Navigation */
+/* 6. Footer-Navigation */
 .footer-nav {
   grid-row: 2;
   background: #222;
@@ -94,6 +101,7 @@ main.container {
   display: flex;
   justify-content: center;
   gap: 1rem;
+  z-index: 20;
 }
 .footer-nav button {
   background: transparent;
@@ -113,14 +121,14 @@ main.container {
   color: #0cf;
 }
 
-/* QR-Code */
+/* 7. QR-Code */
 .qr-code {
   width: 150px;
   height: 150px;
   margin: 1rem auto;
 }
 
-/* Iframe-Platzhalter */
+/* 8. Iframe-Platzhalter */
 .iframe-placeholder {
   width: 80%;
   height: 60%;
@@ -132,7 +140,7 @@ main.container {
   font-size: 1.5rem;
 }
 
-/* Canvas für Konfetti */
+/* 9. Canvas für Konfetti */
 canvas {
   position: fixed !important;
   top: 0; left: 0;
