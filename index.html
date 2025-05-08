@@ -10,105 +10,51 @@
   <script src="script.js" defer></script>
 </head>
 <body>
+
 <main class="container">
 
-  <!-- START -->
+  <!-- START mit Auswahl + Countdown -->
   <section id="startSection" class="section active">
-    <h1>Wann soll der Vortrag starten?</h1>
-    <button onclick="goTo('countdown',900)">In 15 Min</button>
-    <button onclick="goTo('countdown',300)">In 5 Min</button>
-    <button onclick="goTo('countdown',180)">In 3 Min</button>
-    <button onclick="goTo('countdown',60)">In 1 Min</button>
-    <button onclick="goTo('hallo')">Sofort</button>
-  </section>
-
-  <!-- COUNTDOWN -->
-  <section id="countdownSection" class="section">
-    <div class="overlay active">
+    <!-- 1A) Button-Auswahl -->
+    <div id="selectionContainer">
+      <h1>Wann soll der Vortrag starten?</h1>
+      <button onclick="startPresentation(900)">In 15 Min</button>
+      <button onclick="startPresentation(300)">In 5 Min</button>
+      <button onclick="startPresentation(180)">In 3 Min</button>
+      <button onclick="startPresentation(60)">In 1 Min</button>
+      <button onclick="startPresentation(0)">Sofort</button>
+    </div>
+    <!-- 1B) Countdown (wird erst nach Klick sichtbar) -->
+    <div id="countdownContainer" class="overlay">
       <div>
         <h1>Chrono-Präsentation startet in <span id="countdownTimer">00:00</span></h1>
         <p><strong>Thema heute:</strong> KI in Bildung, Beruf und Gesellschaft</p>
-        <p>Info: <a href="https://ebildungslabor.de" target="_blank">ebildungslabor.de</a></p>
-        <img src="https://chart.googleapis.com/chart?chs=150x150&cht=qr&chl=https://ebildungslabor.de"
-             alt="QR-Code" class="qr-code">
+        <img
+          src="https://chart.googleapis.com/chart?chs=150x150&cht=qr&chl=https://ebildungslabor.de"
+          alt="QR-Code eBildungslabor" class="qr-code">
       </div>
     </div>
   </section>
 
   <!-- HALLO -->
   <section id="halloSection" class="section">
+    <!-- Video-Container -->
     <div class="video-wrapper"></div>
-    <div id="halloOverlay" class="overlay">
-      <div>
-        <h1 id="currentTime">00:00</h1>
-        <p id="currentLocation">Ort: …</p>
-      </div>
-    </div>
   </section>
 
   <!-- EINSTIEG -->
   <section id="einstiegSection" class="section">
     <div class="video-wrapper"></div>
-    <div id="einstiegOverlay" class="overlay">
-      <div>
-        <h1>Aufgabe:</h1>
-        <p>Wie definiert ihr KI?</p>
-        <div class="timer">05:00</div>
-      </div>
-    </div>
   </section>
 
   <!-- IMPULS -->
   <section id="impulsSection" class="section">
     <div class="video-wrapper"></div>
-    <div id="impulsOverlay" class="overlay">
-      <div>
-        <h1>Aufgabe:</h1>
-        <p>Sucht Euch eine These und bearbeitet sie!</p>
-        <div class="timer">05:00</div>
-      </div>
-    </div>
   </section>
 
   <!-- VORSTELLUNG -->
   <section id="vorstellungSection" class="section">
     <div class="video-wrapper"></div>
-    <div id="vorstellungStep1" class="overlay">
-      <div>
-        <p>Erste Person bitte bereit machen</p>
-        <div class="timer">00:15</div>
-      </div>
-    </div>
-    <div id="vorstellungStep2" class="overlay">
-      <div>
-        <p>Erste Vorstellung!</p>
-        <div class="timer">01:00</div>
-      </div>
-    </div>
-    <div id="vorstellungStep3" class="overlay">
-      <div>
-        <p>Zweite Person bitte bereit machen</p>
-        <div class="timer">00:15</div>
-      </div>
-    </div>
-    <div id="vorstellungStep4" class="overlay">
-      <div>
-        <p>Zweite Vorstellung!</p>
-        <div class="timer">01:00</div>
-      </div>
-    </div>
-    <div id="vorstellungStep5" class="overlay">
-      <div>
-        <p>Dritte Person bitte bereit machen</p>
-        <div class="timer">00:15</div>
-      </div>
-    </div>
-    <div id="vorstellungStep6" class="overlay">
-      <div>
-        <p>Dritte Vorstellung!</p>
-        <div class="timer">01:00</div>
-      </div>
-    </div>
   </section>
 
   <!-- ABSCHLUSS -->
@@ -118,13 +64,14 @@
       <div>
         <h1>Danke & Feedback</h1>
         <p>Gib uns gerne Rückmeldung!</p>
-        <img src="https://chart.googleapis.com/chart?chs=150x150&cht=qr&chl=https://feedback.example.com"
-             alt="QR-Code Feedback" class="qr-code">
+        <img 
+          src="https://chart.googleapis.com/chart?chs=150x150&cht=qr&chl=https://feedback.example.com" 
+          alt="QR-Code Feedback" class="qr-code">
       </div>
     </div>
   </section>
 
-  <!-- FOOTER -->
+  <!-- FOOTER-NAVIGATION -->
   <nav class="footer-nav">
     <button id="navStart"      onclick="activateSection('startSection')">Start</button>
     <button id="navHallo"      onclick="activateSection('halloSection')">Hallo</button>
@@ -135,5 +82,6 @@
   </nav>
 
 </main>
+
 </body>
 </html>
