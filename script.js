@@ -1,5 +1,7 @@
+// script.js
 document.addEventListener('DOMContentLoaded', () => {
   let runThrough = false;
+
   const sections = document.querySelectorAll('.section');
   const navButtons = {
     startSection:       document.getElementById('navStart'),
@@ -10,44 +12,56 @@ document.addEventListener('DOMContentLoaded', () => {
     abschlussSection:   document.getElementById('navAbschluss')
   };
 
-  // === START-Flow ===
+  // Hilfsfunktion: stoppt und resettet alle Videos
+  function stopAllVideos() {
+    document.querySelectorAll('video').forEach(v => {
+      v.pause();
+      v.currentTime = 0;
+    });
+  }
+
+  // START-Flow: Klick auf „In X Min“ oder „Sofort“
   window.startPresentation = seconds => {
+    stopAllVideos();
     runThrough = (seconds > 0);
-    // Auswahl verbergen, Countdown zeigen
+
+    // Auswahl verbergen, Countdown einblenden
     document.getElementById('selectionContainer').style.display = 'none';
     document.getElementById('countdownContainer').classList.add('active');
 
     if (seconds > 0) {
-      startCountdown(seconds, () => {
-        goToSection('halloSection');
-      });
+      startCountdown(seconds, () => goToSection('halloSection'));
     } else {
       goToSection('halloSection');
     }
   };
 
-  // === Footer-Navi ===
+  // Footer-Navigation
   window.activateSection = id => {
-    runThrough = false;
+    stopAllVideos();
+    runThrough = false;      // manueller Modus
     goToSection(id);
   };
 
-  // === Section-Wechsel ===
+  // Wechsel in eine Section (macht sie sichtbar + hebt Footer-Button hervor)
   function goToSection(id) {
     sections.forEach(s => s.classList.remove('active'));
     Object.values(navButtons).forEach(b => b.classList.remove('active'));
+
     document.getElementById(id).classList.add('active');
     if (navButtons[id]) navButtons[id].classList.add('active');
-    // Auswahl zurücksetzen, falls Start
+
+    // Falls wir zurück zur Start-Section springen:
     if (id === 'startSection') {
       document.getElementById('selectionContainer').style.display = '';
       document.getElementById('countdownContainer').classList.remove('active');
     }
-    // Starte den Bereich
+
+    // Starte die jeweilige Sektion
     startSectionSequence(id);
   }
 
-  // === Countdown ===
+  // Countdown für Start-Section
   function startCountdown(sec, callback) {
     let rem = sec;
     const el = document.getElementById('countdownTimer');
@@ -63,7 +77,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }, 1000);
   }
 
-  // === Bereichs-Dispatcher ===
+  // Dispatcher, der je Section die richtige Routine anstößt
   function startSectionSequence(id) {
     switch (id) {
       case 'halloSection':       handleHallo();       break;
@@ -75,67 +89,77 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // === HALLO ===
+  // === Sektion „Hallo“ ===
   function handleHallo() {
-    const wrap = document.querySelector('#halloSection .video-wrapper');
+    const wrap   = document.querySelector('#halloSection .video-wrapper');
     const ovTime = document.getElementById('timePlaceOverlay');
-    const ovFrame = document.getElementById('iframeOverlay');
+    const ovFrame= document.getElementById('iframeOverlay');
     [ovTime, ovFrame].forEach(o => o.classList.remove('active'));
     wrap.innerHTML = '';
 
-    // a) Video1
+    // a) video1.mp4 + Konfetti
     const v1 = document.createElement('video');
     v1.src = 'video1.mp4';
     v1.playsInline = true;
     wrap.appendChild(v1);
-    // Konfetti beim ersten Play
+
     v1.addEventListener('play', () => {
       confetti({ particleCount: 250, spread: 70, origin: { y: 0.6 } });
     }, { once: true });
+
     v1.play().catch(() => {});
-    // b) Nach Ende → Zeit/Ort für 15s
+
+    // b) Nach Ende von video1 → Ort/Time für 15s
     v1.onended = () => {
       document.getElementById('currentTime').textContent     = new Date().toLocaleTimeString();
       document.getElementById('currentLocation').textContent = 'Ort: Berlin, Deutschland';
       ovTime.classList.add('active');
       setTimeout(() => {
         ovTime.classList.remove('active');
-        // c) Video2
-        const v2 = document.createElement('video');
-        wrap.innerHTML = '';
-        v2.src = 'video2.mp4';
-        v2.playsInline = true;
-        wrap.appendChild(v2);
-        v2.play().catch(() => {});
-        v2.onended = () => {
-          // d) Iframe für 5s
-          ovFrame.classList.add('active');
-          setTimeout(() => {
-            ovFrame.classList.remove('active');
-            // e) Video3 mit Fade
-            wrap.style.opacity = 0;
-            wrap.style.transition = 'opacity 1s';
-            const v3 = document.createElement('video');
-            v3.src = 'video3.mp4';
-            v3.playsInline = true;
-            wrap.innerHTML = '';
-            wrap.appendChild(v3);
-            requestAnimationFrame(() => { wrap.style.opacity = 1; });
-            v3.play().catch(() => {});
-            v3.onended = () => {
-              // Fade-out
-              wrap.style.opacity = 0;
-              wrap.addEventListener('transitionend', () => {
-                if (runThrough) goToSection('einstiegSection');
-              }, { once: true });
-            };
-          }, 5000);
-        };
+        playVideo2();
       }, 15000);
     };
+
+    // c) video2.mp4 abspielen
+    function playVideo2() {
+      wrap.innerHTML = '';
+      const v2 = document.createElement('video');
+      v2.src = 'video2.mp4';
+      v2.playsInline = true;
+      wrap.appendChild(v2);
+      v2.play().catch(() => {});
+
+      // d) Nach Ende → Iframe für 5s
+      v2.onended = () => {
+        ovFrame.classList.add('active');
+        setTimeout(() => {
+          ovFrame.classList.remove('active');
+          playVideo3();
+        }, 5000);
+      };
+    }
+
+    // e) video3.mp4 mit Fade-Effekt
+    function playVideo3() {
+      wrap.style.opacity = 0;
+      wrap.style.transition = 'opacity 1s';
+      wrap.innerHTML = '';
+      const v3 = document.createElement('video');
+      v3.src = 'video3.mp4';
+      v3.playsInline = true;
+      wrap.appendChild(v3);
+      requestAnimationFrame(() => wrap.style.opacity = 1);
+      v3.play().catch(() => {});
+      v3.onended = () => {
+        wrap.style.opacity = 0;
+        wrap.addEventListener('transitionend', () => {
+          if (runThrough) goToSection('einstiegSection');
+        }, { once: true });
+      };
+    }
   }
 
-  // === EINSTIEG ===
+  // === Sektion „Einstieg“ ===
   function handleEinstieg() {
     const wrap = document.querySelector('#einstiegSection .video-wrapper');
     wrap.innerHTML = '';
@@ -151,7 +175,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
   }
 
-  // === IMPULS ===
+  // === Sektion „Impuls“ ===
   function handleImpuls() {
     const wrap = document.querySelector('#impulsSection .video-wrapper');
     wrap.innerHTML = '';
@@ -167,10 +191,10 @@ document.addEventListener('DOMContentLoaded', () => {
     };
   }
 
-  // Aufgaben-Overlay mit Timer
+  // Gemeinsame Funktion für Aufgaben-Overlays mit Timer
   function showTask(secId, text, secs, done) {
     const sec = document.getElementById(secId);
-    const ov = document.createElement('div');
+    const ov  = document.createElement('div');
     ov.className = 'overlay active';
     ov.innerHTML = `
       <div>
@@ -179,6 +203,7 @@ document.addEventListener('DOMContentLoaded', () => {
         <div class="timer">${formatTime(secs)}</div>
       </div>`;
     sec.appendChild(ov);
+
     let rem = secs;
     const tm = ov.querySelector('.timer');
     const iv = setInterval(() => {
@@ -193,7 +218,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }, 1000);
   }
 
-  // === VORSTELLUNG ===
+  // === Sektion „Vorstellung“ ===
   function handleVorstellung() {
     const wrap = document.querySelector('#vorstellungSection .video-wrapper');
     wrap.innerHTML = '';
@@ -231,6 +256,7 @@ document.addEventListener('DOMContentLoaded', () => {
           <div class="timer">${formatTime(s.secs)}</div>
         </div>`;
       sec.appendChild(ov);
+
       let rem = s.secs;
       const tm = ov.querySelector('.timer');
       const iv = setInterval(() => {
@@ -247,7 +273,7 @@ document.addEventListener('DOMContentLoaded', () => {
     next();
   }
 
-  // === ABSCHLUSS ===
+  // === Sektion „Abschluss“ ===
   function handleAbschluss() {
     const wrap = document.querySelector('#abschlussSection .video-wrapper');
     wrap.innerHTML = '';
@@ -257,13 +283,12 @@ document.addEventListener('DOMContentLoaded', () => {
     wrap.appendChild(v7);
     v7.play().catch(() => {});
     v7.onended = () => {
-      const ov = document.getElementById('abschlussOverlay');
-      ov.classList.add('active');
+      document.getElementById('abschlussOverlay').classList.add('active');
       confetti({ particleCount: 250, spread: 70, origin: { y: 0.6 } });
-      // Applaus: falls du eine audio-Datei hast, hier abspielen
     };
   }
 
+  // Hilfsfunktion mm:ss
   function formatTime(secs) {
     const m = String(Math.floor(secs/60)).padStart(2,'0');
     const s = String(secs%60).padStart(2,'0');
