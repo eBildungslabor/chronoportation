@@ -6,31 +6,27 @@
   <title>Interaktive Präsentation – Nele Hirsch</title>
   <link rel="stylesheet" href="css/pico.min.css">
   <link rel="stylesheet" href="css/styles.css">
-  <!-- Canvas-Confetti für später -->
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
   <script src="script.js" defer></script>
 </head>
 <body>
 <main class="container">
-  
-  <!-- STARTSEKTION -->
+
+  <!-- START -->
   <section id="startSection" class="section active">
     <h1>Wann soll der Vortrag starten?</h1>
-    <div class="button-group">
-      <button onclick="goTo(‘countdown’, 900)">In 15 Min</button>
-      <button onclick="goTo(‘countdown’, 300)">In 5 Min</button>
-      <button onclick="goTo(‘countdown’, 180)">In 3 Min</button>
-      <button onclick="goTo(‘countdown’, 60)">In 1 Min</button>
-      <button onclick="goTo(‘hallo’)">Sofort</button>
-    </div>
+    <button onclick="goTo('countdown',900)">In 15 Min</button>
+    <button onclick="goTo('countdown',300)">In 5 Min</button>
+    <button onclick="goTo('countdown',180)">In 3 Min</button>
+    <button onclick="goTo('countdown',60)">In 1 Min</button>
+    <button onclick="goTo('hallo')">Sofort</button>
   </section>
-  
-  <!-- COUNTDOWN-SEKTION -->
+
+  <!-- COUNTDOWN -->
   <section id="countdownSection" class="section">
-    <h1>Chrono-Präsentation startet in:</h1>
     <div class="overlay active">
       <div>
-        <div id="countdownTimer" class="timer">00:00</div>
+        <h1>Chrono-Präsentation startet in <span id="countdownTimer">00:00</span></h1>
         <p><strong>Thema heute:</strong> KI in Bildung, Beruf und Gesellschaft</p>
         <p>Info: <a href="https://ebildungslabor.de" target="_blank">ebildungslabor.de</a></p>
         <img src="https://chart.googleapis.com/chart?chs=150x150&cht=qr&chl=https://ebildungslabor.de"
@@ -38,13 +34,10 @@
       </div>
     </div>
   </section>
-  
-  <!-- 1. HALLO-SEKTION -->
+
+  <!-- HALLO -->
   <section id="halloSection" class="section">
-    <div class="video-wrapper">
-      <video id="video1" src="video1.mp4" playsinline></video>
-    </div>
-    <!-- Overlay für Zeit & Ort -->
+    <div class="video-wrapper"></div>
     <div id="halloOverlay" class="overlay">
       <div>
         <h1 id="currentTime">00:00</h1>
@@ -52,77 +45,75 @@
       </div>
     </div>
   </section>
-  
-  <!-- 2. EINSTIEG-SEKTION -->
+
+  <!-- EINSTIEG -->
   <section id="einstiegSection" class="section">
-    <div class="video-wrapper">
-      <video id="video4" src="video4.mp4" playsinline></video>
-    </div>
-    <!-- Aufgaben-Overlay mit 5-Min-Countdown -->
+    <div class="video-wrapper"></div>
     <div id="einstiegOverlay" class="overlay">
       <div>
         <h1>Aufgabe:</h1>
         <p>Wie definiert ihr KI?</p>
-        <div id="einstiegTimer" class="timer">05:00</div>
+        <div class="timer">05:00</div>
       </div>
     </div>
   </section>
-  
-  <!-- 3. IMPULS-SEKTION -->
+
+  <!-- IMPULS -->
   <section id="impulsSection" class="section">
-    <div class="video-wrapper">
-      <video id="video5" src="video5.mp4" playsinline></video>
-    </div>
-    <!-- Aufgaben-Overlay mit 5-Min-Countdown -->
+    <div class="video-wrapper"></div>
     <div id="impulsOverlay" class="overlay">
       <div>
         <h1>Aufgabe:</h1>
         <p>Sucht Euch eine These und bearbeitet sie!</p>
-        <div id="impulsTimer" class="timer">05:00</div>
+        <div class="timer">05:00</div>
       </div>
     </div>
   </section>
-  
-  <!-- 4. VORSTELLUNG-SEKTION -->
+
+  <!-- VORSTELLUNG -->
   <section id="vorstellungSection" class="section">
-    <div class="video-wrapper">
-      <video id="video6" src="video6.mp4" playsinline></video>
-    </div>
-    <!-- Drei aufeinanderfolgende Texteinblendungen -->
-    <div id="vorstellungOverlay" class="overlay">
-      <div id="vorstellungStep1" class="step">
+    <div class="video-wrapper"></div>
+    <div id="vorstellungStep1" class="overlay">
+      <div>
         <p>Erste Person bitte bereit machen</p>
         <div class="timer">00:15</div>
       </div>
-      <div id="vorstellungStep2" class="step">
+    </div>
+    <div id="vorstellungStep2" class="overlay">
+      <div>
         <p>Erste Vorstellung!</p>
         <div class="timer">01:00</div>
       </div>
-      <div id="vorstellungStep3" class="step">
+    </div>
+    <div id="vorstellungStep3" class="overlay">
+      <div>
         <p>Zweite Person bitte bereit machen</p>
         <div class="timer">00:15</div>
       </div>
-      <div id="vorstellungStep4" class="step">
+    </div>
+    <div id="vorstellungStep4" class="overlay">
+      <div>
         <p>Zweite Vorstellung!</p>
         <div class="timer">01:00</div>
       </div>
-      <div id="vorstellungStep5" class="step">
+    </div>
+    <div id="vorstellungStep5" class="overlay">
+      <div>
         <p>Dritte Person bitte bereit machen</p>
         <div class="timer">00:15</div>
       </div>
-      <div id="vorstellungStep6" class="step">
+    </div>
+    <div id="vorstellungStep6" class="overlay">
+      <div>
         <p>Dritte Vorstellung!</p>
         <div class="timer">01:00</div>
       </div>
     </div>
   </section>
-  
-  <!-- 5. ABSCHLUSS-SEKTION -->
+
+  <!-- ABSCHLUSS -->
   <section id="abschlussSection" class="section">
-    <div class="video-wrapper">
-      <video id="video7" src="video7.mp4" playsinline></video>
-    </div>
-    <!-- Abschluss-Overlay -->
+    <div class="video-wrapper"></div>
     <div id="abschlussOverlay" class="overlay">
       <div>
         <h1>Danke & Feedback</h1>
@@ -132,15 +123,15 @@
       </div>
     </div>
   </section>
-  
-  <!-- FOOTER-NAVIGATION -->
+
+  <!-- FOOTER -->
   <nav class="footer-nav">
-    <button onclick="activateSection('startSection')" id="navStart">Start</button>
-    <button onclick="activateSection('halloSection')" id="navHallo">Hallo</button>
-    <button onclick="activateSection('einstiegSection')" id="navEinstieg">Einstieg</button>
-    <button onclick="activateSection('impulsSection')" id="navImpuls">Impuls</button>
-    <button onclick="activateSection('vorstellungSection')" id="navVorstellung">Vorstellung</button>
-    <button onclick="activateSection('abschlussSection')" id="navAbschluss">Abschluss</button>
+    <button id="navStart"      onclick="activateSection('startSection')">Start</button>
+    <button id="navHallo"      onclick="activateSection('halloSection')">Hallo</button>
+    <button id="navEinstieg"   onclick="activateSection('einstiegSection')">Einstieg</button>
+    <button id="navImpuls"     onclick="activateSection('impulsSection')">Impuls</button>
+    <button id="navVorstellung"onclick="activateSection('vorstellungSection')">Vorstellung</button>
+    <button id="navAbschluss"  onclick="activateSection('abschlussSection')">Abschluss</button>
   </nav>
 
 </main>
