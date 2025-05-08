@@ -10,12 +10,10 @@
   <script src="script.js" defer></script>
 </head>
 <body>
-
 <main class="container">
 
-  <!-- START mit Auswahl + Countdown -->
+  <!-- START -->
   <section id="startSection" class="section active">
-    <!-- 1A) Button-Auswahl -->
     <div id="selectionContainer">
       <h1>Wann soll der Vortrag starten?</h1>
       <button onclick="startPresentation(900)">In 15 Min</button>
@@ -24,22 +22,28 @@
       <button onclick="startPresentation(60)">In 1 Min</button>
       <button onclick="startPresentation(0)">Sofort</button>
     </div>
-    <!-- 1B) Countdown (wird erst nach Klick sichtbar) -->
     <div id="countdownContainer" class="overlay">
       <div>
         <h1>Chrono-Präsentation startet in <span id="countdownTimer">00:00</span></h1>
         <p><strong>Thema heute:</strong> KI in Bildung, Beruf und Gesellschaft</p>
-        <img
-          src="https://chart.googleapis.com/chart?chs=150x150&cht=qr&chl=https://ebildungslabor.de"
-          alt="QR-Code eBildungslabor" class="qr-code">
+        <img src="https://chart.googleapis.com/chart?chs=150x150&cht=qr&chl=https://ebildungslabor.de"
+             alt="QR-Code" class="qr-code">
       </div>
     </div>
   </section>
 
   <!-- HALLO -->
   <section id="halloSection" class="section">
-    <!-- Video-Container -->
     <div class="video-wrapper"></div>
+    <div id="timePlaceOverlay" class="overlay">
+      <div>
+        <h1 id="currentTime"></h1>
+        <p id="currentLocation"></p>
+      </div>
+    </div>
+    <div id="iframeOverlay" class="overlay">
+      <iframe src="#" class="iframe-placeholder" title="Mastowall-Platzhalter"></iframe>
+    </div>
   </section>
 
   <!-- EINSTIEG -->
@@ -64,14 +68,13 @@
       <div>
         <h1>Danke & Feedback</h1>
         <p>Gib uns gerne Rückmeldung!</p>
-        <img 
-          src="https://chart.googleapis.com/chart?chs=150x150&cht=qr&chl=https://feedback.example.com" 
-          alt="QR-Code Feedback" class="qr-code">
+        <img src="https://chart.googleapis.com/chart?chs=150x150&cht=qr&chl=https://feedback.example.com"
+             alt="QR-Code Feedback" class="qr-code">
       </div>
     </div>
   </section>
 
-  <!-- FOOTER-NAVIGATION -->
+  <!-- FOOTER-NAV -->
   <nav class="footer-nav">
     <button id="navStart"      onclick="activateSection('startSection')">Start</button>
     <button id="navHallo"      onclick="activateSection('halloSection')">Hallo</button>
@@ -82,6 +85,5 @@
   </nav>
 
 </main>
-
 </body>
 </html>
