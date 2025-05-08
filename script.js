@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
-  let runThrough = false;           // Steuerung: Flow (true) vs. manuelle Navi (false)
+  let runThrough = false;
   const sections = document.querySelectorAll('.section');
   const navButtons = {
     startSection:       document.getElementById('navStart'),
@@ -10,67 +10,62 @@ document.addEventListener('DOMContentLoaded', () => {
     abschlussSection:   document.getElementById('navAbschluss')
   };
 
-  // 1) Aufruf aus Start-Buttons
+  // === START-Flow ===
   window.startPresentation = seconds => {
     runThrough = (seconds > 0);
-    // Umschalten: Auswahl verstecken, Countdown einblenden (nur im Start-Section)
+    // Auswahl verbergen, Countdown zeigen
     document.getElementById('selectionContainer').style.display = 'none';
     document.getElementById('countdownContainer').classList.add('active');
 
     if (seconds > 0) {
       startCountdown(seconds, () => {
-        // nach Countdown direkt in „Hallo“
-        activateSection('halloSection');
-        startSectionSequence('halloSection');
+        goToSection('halloSection');
       });
     } else {
-      // ohne Countdown direkt „Hallo“
-      activateSection('halloSection');
-      startSectionSequence('halloSection');
+      goToSection('halloSection');
     }
   };
 
-  // 2) Footer-Navigation
-  window.activateSection = sectionId => {
-    runThrough = false;                  // manuelles Springen bricht Flow ab
-    showSection(sectionId);
-    // beim manuellen Springen startet der Bereich sofort:
-    startSectionSequence(sectionId);
+  // === Footer-Navi ===
+  window.activateSection = id => {
+    runThrough = false;
+    goToSection(id);
   };
 
-  // allgemeines Umschalten & Button-Highlight
-  function showSection(id) {
+  // === Section-Wechsel ===
+  function goToSection(id) {
     sections.forEach(s => s.classList.remove('active'));
     Object.values(navButtons).forEach(b => b.classList.remove('active'));
     document.getElementById(id).classList.add('active');
     if (navButtons[id]) navButtons[id].classList.add('active');
-
-    // Falls wir zurück auf Start springen: Rücksetzen
+    // Auswahl zurücksetzen, falls Start
     if (id === 'startSection') {
       document.getElementById('selectionContainer').style.display = '';
       document.getElementById('countdownContainer').classList.remove('active');
     }
+    // Starte den Bereich
+    startSectionSequence(id);
   }
 
-  // 3) Countdown
-  function startCountdown(seconds, onEnd) {
-    let rem = seconds;
+  // === Countdown ===
+  function startCountdown(sec, callback) {
+    let rem = sec;
     const el = document.getElementById('countdownTimer');
     el.textContent = formatTime(rem);
     const iv = setInterval(() => {
       rem--;
       if (rem <= 0) {
         clearInterval(iv);
-        onEnd();
+        callback();
       } else {
         el.textContent = formatTime(rem);
       }
     }, 1000);
   }
 
-  // 4) Bereichs-Sequenz
-  function startSectionSequence(sectionId) {
-    switch (sectionId) {
+  // === Bereichs-Dispatcher ===
+  function startSectionSequence(id) {
+    switch (id) {
       case 'halloSection':       handleHallo();       break;
       case 'einstiegSection':    handleEinstieg();    break;
       case 'impulsSection':      handleImpuls();      break;
@@ -80,9 +75,12 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // --- 4.1 HALLO ---
+  // === HALLO ===
   function handleHallo() {
     const wrap = document.querySelector('#halloSection .video-wrapper');
+    const ovTime = document.getElementById('timePlaceOverlay');
+    const ovFrame = document.getElementById('iframeOverlay');
+    [ovTime, ovFrame].forEach(o => o.classList.remove('active'));
     wrap.innerHTML = '';
 
     // a) Video1
@@ -90,14 +88,18 @@ document.addEventListener('DOMContentLoaded', () => {
     v1.src = 'video1.mp4';
     v1.playsInline = true;
     wrap.appendChild(v1);
+    // Konfetti beim ersten Play
+    v1.addEventListener('play', () => {
+      confetti({ particleCount: 250, spread: 70, origin: { y: 0.6 } });
+    }, { once: true });
     v1.play().catch(() => {});
-
-    // Konfetti beim Start
-    confetti({ particleCount: 250, spread: 70, origin: { y: 0.6 } });
-
-    // b) Nach Ende Video1 → Ortseinblendung 15s
+    // b) Nach Ende → Zeit/Ort für 15s
     v1.onended = () => {
-      showLocation(() => {
+      document.getElementById('currentTime').textContent     = new Date().toLocaleTimeString();
+      document.getElementById('currentLocation').textContent = 'Ort: Berlin, Deutschland';
+      ovTime.classList.add('active');
+      setTimeout(() => {
+        ovTime.classList.remove('active');
         // c) Video2
         const v2 = document.createElement('video');
         wrap.innerHTML = '';
@@ -105,30 +107,35 @@ document.addEventListener('DOMContentLoaded', () => {
         v2.playsInline = true;
         wrap.appendChild(v2);
         v2.play().catch(() => {});
-        // d) nach Ende → weiter im Flow
         v2.onended = () => {
-          if (runThrough) {
-            activateSection('einstiegSection');
-            startSectionSequence('einstiegSection');
-          }
+          // d) Iframe für 5s
+          ovFrame.classList.add('active');
+          setTimeout(() => {
+            ovFrame.classList.remove('active');
+            // e) Video3 mit Fade
+            wrap.style.opacity = 0;
+            wrap.style.transition = 'opacity 1s';
+            const v3 = document.createElement('video');
+            v3.src = 'video3.mp4';
+            v3.playsInline = true;
+            wrap.innerHTML = '';
+            wrap.appendChild(v3);
+            requestAnimationFrame(() => { wrap.style.opacity = 1; });
+            v3.play().catch(() => {});
+            v3.onended = () => {
+              // Fade-out
+              wrap.style.opacity = 0;
+              wrap.addEventListener('transitionend', () => {
+                if (runThrough) goToSection('einstiegSection');
+              }, { once: true });
+            };
+          }, 5000);
         };
-      });
+      }, 15000);
     };
   }
 
-  // Location-Screen für 15 Sekunden
-  function showLocation(onDone) {
-    showSection('halloSection');
-    const txt = document.getElementById('halloSection')
-                  .querySelector('h1, p, video-wrapper')
-                  || document.querySelector('#locationText');
-    // wir wechseln hier nur visuell – deshalb ein Delay
-    setTimeout(() => {
-      onDone();
-    }, 15000);
-  }
-
-  // --- 4.2 EINSTIEG ---
+  // === EINSTIEG ===
   function handleEinstieg() {
     const wrap = document.querySelector('#einstiegSection .video-wrapper');
     wrap.innerHTML = '';
@@ -138,16 +145,13 @@ document.addEventListener('DOMContentLoaded', () => {
     wrap.appendChild(v4);
     v4.play().catch(() => {});
     v4.onended = () => {
-      showTimerOverlay('einstiegSection', 'Wie definiert ihr KI?', 300, () => {
-        if (runThrough) {
-          activateSection('impulsSection');
-          startSectionSequence('impulsSection');
-        }
+      showTask('einstiegSection', 'Wie definiert ihr KI?', 300, () => {
+        if (runThrough) goToSection('impulsSection');
       });
     };
   }
 
-  // --- 4.3 IMPULS ---
+  // === IMPULS ===
   function handleImpuls() {
     const wrap = document.querySelector('#impulsSection .video-wrapper');
     wrap.innerHTML = '';
@@ -157,18 +161,15 @@ document.addEventListener('DOMContentLoaded', () => {
     wrap.appendChild(v5);
     v5.play().catch(() => {});
     v5.onended = () => {
-      showTimerOverlay('impulsSection', 'Sucht Euch eine These und bearbeitet sie!', 300, () => {
-        if (runThrough) {
-          activateSection('vorstellungSection');
-          startSectionSequence('vorstellungSection');
-        }
+      showTask('impulsSection', 'Sucht Euch eine These und bearbeitet sie!', 300, () => {
+        if (runThrough) goToSection('vorstellungSection');
       });
     };
   }
 
-  // Universelle Aufgaben-Einblendung
-  function showTimerOverlay(sectionId, text, secs, done) {
-    showSection(sectionId);
+  // Aufgaben-Overlay mit Timer
+  function showTask(secId, text, secs, done) {
+    const sec = document.getElementById(secId);
     const ov = document.createElement('div');
     ov.className = 'overlay active';
     ov.innerHTML = `
@@ -177,8 +178,7 @@ document.addEventListener('DOMContentLoaded', () => {
         <p>${text}</p>
         <div class="timer">${formatTime(secs)}</div>
       </div>`;
-    document.getElementById(sectionId).appendChild(ov);
-
+    sec.appendChild(ov);
     let rem = secs;
     const tm = ov.querySelector('.timer');
     const iv = setInterval(() => {
@@ -193,7 +193,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }, 1000);
   }
 
-  // --- 4.4 VORSTELLUNG ---
+  // === VORSTELLUNG ===
   function handleVorstellung() {
     const wrap = document.querySelector('#vorstellungSection .video-wrapper');
     wrap.innerHTML = '';
@@ -203,23 +203,22 @@ document.addEventListener('DOMContentLoaded', () => {
     wrap.appendChild(v6);
     v6.play().catch(() => {});
     v6.onended = () => {
-      runOverlaySteps([
+      const steps = [
         { text: 'Erste Person bitte bereit machen', secs: 15 },
         { text: 'Erste Vorstellung!', secs: 60 },
         { text: 'Zweite Person bitte bereit machen', secs: 15 },
         { text: 'Zweite Vorstellung!', secs: 60 },
         { text: 'Dritte Person bitte bereit machen', secs: 15 },
         { text: 'Dritte Vorstellung!', secs: 60 }
-      ], () => {
-        if (runThrough) {
-          activateSection('abschlussSection');
-          startSectionSequence('abschlussSection');
-        }
+      ];
+      runOverlaySteps('vorstellungSection', steps, () => {
+        if (runThrough) goToSection('abschlussSection');
       });
     };
   }
 
-  function runOverlaySteps(steps, done) {
+  function runOverlaySteps(secId, steps, done) {
+    const sec = document.getElementById(secId);
     let i = 0;
     function next() {
       if (i >= steps.length) return done();
@@ -231,8 +230,7 @@ document.addEventListener('DOMContentLoaded', () => {
           <p>${s.text}</p>
           <div class="timer">${formatTime(s.secs)}</div>
         </div>`;
-      document.getElementById('vorstellungSection').appendChild(ov);
-
+      sec.appendChild(ov);
       let rem = s.secs;
       const tm = ov.querySelector('.timer');
       const iv = setInterval(() => {
@@ -249,7 +247,7 @@ document.addEventListener('DOMContentLoaded', () => {
     next();
   }
 
-  // --- 4.5 ABSCHLUSS ---
+  // === ABSCHLUSS ===
   function handleAbschluss() {
     const wrap = document.querySelector('#abschlussSection .video-wrapper');
     wrap.innerHTML = '';
@@ -262,11 +260,10 @@ document.addEventListener('DOMContentLoaded', () => {
       const ov = document.getElementById('abschlussOverlay');
       ov.classList.add('active');
       confetti({ particleCount: 250, spread: 70, origin: { y: 0.6 } });
-      // neuer Applaus-Sound hier, falls gewünscht
+      // Applaus: falls du eine audio-Datei hast, hier abspielen
     };
   }
 
-  // Hilfsfunktion mm:ss
   function formatTime(secs) {
     const m = String(Math.floor(secs/60)).padStart(2,'0');
     const s = String(secs%60).padStart(2,'0');
