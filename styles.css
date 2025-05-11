@@ -1,0 +1,124 @@
+/* Basis & Reset */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+html, body {
+  width: 100%;
+  height: 100%;
+  background: #111;
+  color: #eee;
+  font-family: sans-serif;
+  overflow: hidden;
+}
+
+/* Helfer */
+.hidden { display: none !important; }
+
+/* Start-Screen */
+#startSection {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+}
+#startSection button {
+  margin: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+/* Countdown im Start-Screen */
+#countdown {
+  margin-top: 2rem;
+  font-size: 1.5rem;
+}
+
+/* Video-Screen */
+#videoSection {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+}
+.video-wrapper {
+  width: 100%;
+  height: 100%;
+  background: black;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.video-wrapper video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Overlay über dem Video */
+.overlay {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.8);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 2rem;
+  color: #fff;
+  z-index: 2;
+}
+.overlay.active {
+  display: flex;
+}
+.overlay h1 {
+  font-size: 4vw;
+  margin-bottom: 1rem;
+}
+.overlay .timer {
+  font-size: 3vw;
+}
+.countdown-large {
+  font-size: 6vw;
+  font-weight: bold;
+}
+.blink {
+  animation: blink 1s steps(2, start) infinite;
+}
+@keyframes blink {
+  to { visibility: hidden; }
+}
+
+/* Footer */
+#footerNav {
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  background: rgba(0,0,0,0.7);
+  padding: 0.5rem;
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  z-index: 3;
+}
+#footerNav button {
+  background: transparent;
+  border: 1px solid #555;
+  color: #ccc;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+}
+#footerNav button.active {
+  border-color: #0af;
+  color: #0af;
+}
+#footerNav button:hover {
+  border-color: #0cf;
+  color: #0cf;
+}
