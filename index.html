@@ -2,89 +2,39 @@
 <html lang="de">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Interaktive Präsentation – Nele Hirsch</title>
-  <link rel="stylesheet" href="css/pico.min.css">
-  <link rel="stylesheet" href="css/styles.css">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>Remix-Vortrag</title>
+  <link rel="stylesheet" href="styles.css">
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
   <script src="script.js" defer></script>
 </head>
 <body>
-<main class="container">
 
-  <!-- START -->
-  <section id="startSection" class="section active">
-    <div id="selectionContainer">
-      <h1>Wann soll der Vortrag starten?</h1>
-      <button onclick="startPresentation(900)">In 15 Min</button>
-      <button onclick="startPresentation(300)">In 5 Min</button>
-      <button onclick="startPresentation(180)">In 3 Min</button>
-      <button onclick="startPresentation(60)">In 1 Min</button>
-      <button onclick="startPresentation(0)">Sofort</button>
+  <!-- 1) START-SCREEN -->
+  <section id="startSection">
+    <h1>Wann starten?</h1>
+    <button onclick="startPresentation(900)">In 15 Min</button>
+    <button onclick="startPresentation(300)">In 5 Min</button>
+    <button onclick="startPresentation(180)">In 3 Min</button>
+    <button onclick="startPresentation(60)">In 1 Min</button>
+    <button onclick="startPresentation(0)">Sofort</button>
+    <div id="countdown" class="hidden">
+      <h2>Start in <span id="cdTimer">00:00</span></h2>
     </div>
-    <div id="countdownContainer" class="overlay">
-      <div>
-        <h1>Bitte etwas Geduld. Nele Chronoportiert sich zu euch!</h1>
-        <h2>Verbleibende Zeit: <span id="countdownTimer">00:00</span></h2>
-        <p>Wenn Du dich vorab schon zu Neles Arbeit im eBildungslabor.de informieren willst, dann frage doch ein KI-Sprachmodell danach, nutze eine Internetsuche oder verschaffe dir einen direkten Überblick auf der Website:</p>
-        <img src="https://chart.googleapis.com/chart?chs=150x150&cht=qr&chl=https://ebildungslabor.de"
-             alt="QR-Code" class="qr-code">
+  </section>
+
+  <!-- 2) VIDEO-SCREEN -->
+  <section id="videoSection" class="hidden">
+    <div class="video-wrapper">
+      <video id="mainVideo" playsinline controls></video>
+      <div id="videoOverlay" class="overlay">
+        <div id="overlayContent"></div>
       </div>
     </div>
   </section>
 
-  <!-- HALLO -->
-  <section id="halloSection" class="section">
-    <div class="video-wrapper"></div>
-    <div id="timePlaceOverlay" class="overlay">
-      <div>
-        <h1 id="currentTime"></h1>
-        <p id="currentLocation"></p>
-      </div>
-    </div>
-    <div id="iframeOverlay" class="overlay">
-      <iframe src="#" class="iframe-placeholder" title="Mastowall-Platzhalter"></iframe>
-    </div>
-  </section>
+  <!-- 3) FOOTER -->
+  <nav id="footerNav" class="hidden"></nav>
 
-  <!-- EINSTIEG -->
-  <section id="einstiegSection" class="section">
-    <div class="video-wrapper"></div>
-  </section>
-
-  <!-- IMPULS -->
-  <section id="impulsSection" class="section">
-    <div class="video-wrapper"></div>
-  </section>
-
-  <!-- VORSTELLUNG -->
-  <section id="vorstellungSection" class="section">
-    <div class="video-wrapper"></div>
-  </section>
-
-  <!-- ABSCHLUSS -->
-  <section id="abschlussSection" class="section">
-    <div class="video-wrapper"></div>
-    <div id="abschlussOverlay" class="overlay">
-      <div>
-        <h1>Danke & Feedback</h1>
-        <p>Gib uns gerne Rückmeldung!</p>
-        <img src="https://chart.googleapis.com/chart?chs=150x150&cht=qr&chl=https://feedback.example.com"
-             alt="QR-Code Feedback" class="qr-code">
-      </div>
-    </div>
-  </section>
-
-  <!-- FOOTER-NAV -->
-  <nav class="footer-nav">
-    <button id="navStart"      onclick="activateSection('startSection')">Start</button>
-    <button id="navHallo"      onclick="activateSection('halloSection')">Hallo</button>
-    <button id="navEinstieg"   onclick="activateSection('einstiegSection')">Einstieg</button>
-    <button id="navImpuls"     onclick="activateSection('impulsSection')">Impuls</button>
-    <button id="navVorstellung"onclick="activateSection('vorstellungSection')">Vorstellung</button>
-    <button id="navAbschluss"  onclick="activateSection('abschlussSection')">Abschluss</button>
-  </nav>
-
-</main>
 </body>
 </html>
