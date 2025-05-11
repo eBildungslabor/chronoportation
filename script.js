@@ -1,6 +1,6 @@
 // --- 1) Konfiguration ---
 const config = {
-  videoSrc: 'video.mp4',
+  videoSrc: 'https://ebildungslabor.de/slides/video.mp4',
   footers: [
     { label: 'Minute 1', time: 60 },
     { label: 'Minute 2', time: 120 },
