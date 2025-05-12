@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1.0">
-  <title>Gemeinsam KI erkunden</title>
+  <title>Interaktive Präsentation</title>
   <link rel="stylesheet" href="styles.css">
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
   <script src="script.js" defer></script>
@@ -20,18 +20,20 @@
       <button onclick="startPresentation(60)">In 1 Min</button>
       <button onclick="startPresentation(0)">Sofort</button>
     </div>
-    <div id="countdown" class="hidden">
-      <h2>Start in <span id="cdTimer">00:00</span></h2>
+    <div id="countdownContainer" class="hidden">
+      <h2>Start in <span id="countdownTimer">00:00</span></h2>
     </div>
   </section>
 
   <!-- 2) VIDEO-SCREEN -->
   <section id="videoSection" class="hidden">
     <div class="video-wrapper">
-      <video id="mainVideo" playsinline controls crossOrigin="anonymous"></video>
-      <div id="videoOverlay" class="overlay">
-        <div id="overlayContent"></div>
-      </div>
+      <video id="mainVideo" controls playsinline crossOrigin="anonymous">
+        <source id="videoSource" src="" type="video/mp4">
+        Dein Browser unterstützt das Video-Tag nicht.
+      </video>
+      <!-- Optional für spätere Overlays -->
+      <div id="videoOverlay" class="overlay"></div>
     </div>
   </section>
 
