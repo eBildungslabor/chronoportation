@@ -1,184 +1,127 @@
 // --- 1) Konfiguration ---
 const config = {
+  // Kann lokal (z.B. 'video1.mp4') oder extern sein:
   videoSrc: 'https://ebildungslabor.de/slides/video.mp4',
+  // Footer-Buttons springen auf diese Zeitpunkte (in Sekunden)
   footers: [
     { label: 'Minute 1', time: 60 },
     { label: 'Minute 2', time: 120 },
     { label: 'Minute 3', time: 180 }
-  ],
-  overlays: [
-    // Bild-Overlay bei 0:20 für 10 s, Video läuft weiter
-    { time: 20,  duration: 10, type: 'image',    src: 'bild1.jpg', pauseVideo: false },
-    // Countdown-Overlay bei 0:50 für 60 s, Video pausiert
-    {
-      time:       50,
-      duration:   60,
-      type:       'countdown',
-      text:       'Tausche dich mit Nebensitzer für eine Minute aus!',
-      pauseVideo: true
-    }
   ]
+  // Overlays / Interaktionen fügen wir später hier hinzu
 };
 
 // --- 2) State & DOM-Refs ---
-let mainVideo,
-    countdownEl, cdTimer,
-    footerNav,
-    overlayEl, overlayContent;
-
 let countdownInterval = null;
-let overlayTimeoutId   = null;
-let overlayCountdownId = null;
-let _overlayIndex      = 0;
+let mainVideo, videoSource,
+    countdownContainer, countdownTimer,
+    footerNav;
 
+// Nach Laden des DOM initialisieren
 document.addEventListener('DOMContentLoaded', () => {
-  // DOM-Referenzen
-  mainVideo      = document.getElementById('mainVideo');
-  countdownEl    = document.getElementById('countdown');
-  cdTimer        = document.getElementById('cdTimer');
-  footerNav      = document.getElementById('footerNav');
-  overlayEl      = document.getElementById('videoOverlay');
-  overlayContent = document.getElementById('overlayContent');
+  // Refs
+  mainVideo         = document.getElementById('mainVideo');
+  videoSource       = document.getElementById('videoSource');
+  countdownContainer= document.getElementById('countdownContainer');
+  countdownTimer    = document.getElementById('countdownTimer');
+  footerNav         = document.getElementById('footerNav');
 
-  // Video-Quelle setzen
-  mainVideo.src = config.videoSrc;
+  // Video-Quelle setzen & laden
+  videoSource.src = config.videoSrc;
+  mainVideo.load();
 
   // Footer-Buttons generieren
   for (const btn of config.footers) {
     const b = document.createElement('button');
-    b.textContent = btn.label;
-    b.onclick     = () => seekTo(btn.time);
+    b.textContent      = btn.label;
+    b.dataset.time     = btn.time;
+    b.onclick          = () => {
+      stopAll();
+      showVideoSection();
+      playVideoAt(btn.time);
+      highlightFooter(btn.time);
+    };
     footerNav.appendChild(b);
   }
 
-  // Overlay-Trigger
-  mainVideo.addEventListener('timeupdate', checkOverlays);
-
-  // 1× Konfetti beim ersten Play
+  // Einmalig Konfetti beim ersten Play
   mainVideo.addEventListener('play', () => {
-    confetti({ particleCount: 150, spread: 60, origin: { y: 0.6 } });
+    confetti({ particleCount:150, spread:60, origin:{ y:0.6 } });
   }, { once: true });
 });
 
-// --- 3) Stoppe alle Prozesse beim Neuanfang ---
+// --- 3) Helfer: Prozesse stoppen ---
 function stopAll() {
-  // Stoppe Start-Countdown
-  if (countdownInterval) clearInterval(countdownInterval);
-  countdownEl.classList.add('hidden');
-
-  // Stoppe Video
-  if (!mainVideo.paused) mainVideo.pause();
-
-  // Stoppe Overlay-Timer
-  if (overlayTimeoutId) clearTimeout(overlayTimeoutId);
-  if (overlayCountdownId) clearInterval(overlayCountdownId);
-
-  // Overlay verbergen & zurücksetzen
-  overlayEl.classList.remove('active');
-  _overlayIndex = 0;
-}
-
-// --- 4) Start-Präsentation / Countdown ---
-function startPresentation(seconds) {
-  stopAll();
-  document.getElementById('startSection').classList.add('hidden');
-  document.getElementById('videoSection').classList.remove('hidden');
-  footerNav.classList.remove('hidden');
-
-  if (seconds > 0) {
-    countdownEl.classList.remove('hidden');
-    startCountdown(seconds, () => {
-      countdownEl.classList.add('hidden');
-      playVideo(0);
-    });
-  } else {
-    playVideo(0);
+  // Countdown anhalten
+  if (countdownInterval) {
+    clearInterval(countdownInterval);
+    countdownInterval = null;
+  }
+  // Video pausieren
+  if (!mainVideo.paused) {
+    mainVideo.pause();
   }
 }
 
-function startCountdown(sec, onEnd) {
+// --- 4) Start-Logik mit Countdown ---
+function startPresentation(delaySec) {
+  stopAll();
+  // Auswahl verbergen, Countdown einblenden
+  document.getElementById('selectionContainer').classList.add('hidden');
+  countdownContainer.classList.remove('hidden');
+
+  if (delaySec > 0) {
+    runCountdown(delaySec, () => {
+      countdownContainer.classList.add('hidden');
+      showVideoSection();
+      playVideoAt(0);
+    });
+  } else {
+    countdownContainer.classList.add('hidden');
+    showVideoSection();
+    playVideoAt(0);
+  }
+}
+
+// Countdown-Funktion (Gong bei 2 s)
+function runCountdown(sec, onFinish) {
   let rem = sec;
-  cdTimer.textContent = formatTime(rem);
+  countdownTimer.textContent = formatTime(rem);
   countdownInterval = setInterval(() => {
     rem--;
     if (rem === 2) new Audio('gong.mp3').play().catch(console.warn);
     if (rem < 0) {
       clearInterval(countdownInterval);
-      onEnd();
+      countdownInterval = null;
+      onFinish();
     } else {
-      cdTimer.textContent = formatTime(rem);
+      countdownTimer.textContent = formatTime(rem);
     }
   }, 1000);
 }
 
-// --- 5) Video-Steuerung & Footer-Jump ---
-function playVideo(startTime) {
-  mainVideo.currentTime = startTime;
+// --- 5) Video-Section anzeigen & Footer aktivieren ---
+function showVideoSection() {
+  document.getElementById('startSection').classList.add('hidden');
+  document.getElementById('videoSection').classList.remove('hidden');
+  footerNav.classList.remove('hidden');
+}
+
+// --- 6) Video steuern & Footer hervorheben ---
+function playVideoAt(seconds) {
+  mainVideo.currentTime = seconds;
   mainVideo.play().catch(console.warn);
 }
 
-function seekTo(sec) {
-  stopAll();
-  playVideo(sec);
-}
-
-// --- 6) Overlay-Logik ---
-function checkOverlays() {
-  if (_overlayIndex >= config.overlays.length) return;
-  const o = config.overlays[_overlayIndex];
-  if (mainVideo.currentTime >= o.time) {
-    showOverlay(o);
-    _overlayIndex++;
+function highlightFooter(sec) {
+  for (const btn of footerNav.children) {
+    btn.classList.toggle('active', Number(btn.dataset.time) === sec);
   }
 }
 
-function showOverlay(o) {
-  // Inhalt vorbereiten
-  overlayContent.innerHTML = '';
-  if (o.type === 'image') {
-    const img = document.createElement('img');
-    img.src = o.src;
-    img.style.maxWidth  = '80%';
-    img.style.maxHeight = '80%';
-    overlayContent.appendChild(img);
-  } else if (o.type === 'countdown') {
-    const cont = document.createElement('div');
-    cont.innerHTML = `
-      <h1>${o.text}</h1>
-      <div id="overlayTimer" class="timer">${formatTime(o.duration)}</div>
-    `;
-    overlayContent.appendChild(cont);
-  }
-
-  // Overlay zeigen & ggf. Video pausieren
-  overlayEl.classList.add('active');
-  if (o.pauseVideo) mainVideo.pause();
-
-  // Ablauf
-  if (o.type === 'countdown') {
-    let rem = o.duration;
-    const tm = document.getElementById('overlayTimer');
-    overlayCountdownId = setInterval(() => {
-      rem--;
-      if (rem === 2) new Audio('gong.mp3').play().catch(console.warn);
-      tm.textContent = formatTime(rem);
-      if (rem <= 0) {
-        clearInterval(overlayCountdownId);
-        overlayEl.classList.remove('active');
-        if (o.pauseVideo) mainVideo.play().catch(console.warn);
-      }
-    }, 1000);
-  } else {
-    overlayTimeoutId = setTimeout(() => {
-      overlayEl.classList.remove('active');
-      if (o.pauseVideo) mainVideo.play().catch(console.warn);
-    }, o.duration * 1000);
-  }
-}
-
-// --- 7) Utility: mm:ss ---
-function formatTime(s) {
-  const m   = String(Math.floor(s/60)).padStart(2,'0');
-  const sec = String(s%60).padStart(2,'0');
-  return `${m}:${sec}`;
+// Hilfsfunktion: Sekunden → "MM:SS"
+function formatTime(total) {
+  const m = String(Math.floor(total/60)).padStart(2,'0');
+  const s = String(total % 60).padStart(2,'0');
+  return `${m}:${s}`;
 }
