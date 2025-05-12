@@ -1,8 +1,8 @@
 // --- 1) Konfiguration ---
 const config = {
-  // Video-URL (extern oder lokal)
+  // Hier deine Video-URL (extern oder lokal)
   videoSrc: 'https://ebildungslabor.de/slides/video.mp4',
-  // Footer-Sprungmarken
+  // Fuß-Buttons springen zu diesen Sekunden
   footers: [
     { label: 'Minute 1', time: 60 },
     { label: 'Minute 2', time: 120 },
@@ -10,40 +10,39 @@ const config = {
   ]
 };
 
-// --- 2) State & DOM-Referenzen ---
-let mainVideo, videoSource;
-let countdownContainer, countdownTimer;
-let footerNav;
-let countdownInterval = null;
+// --- 2) State & Refs ---
+let mainVideo,
+    countdownContainer, countdownTimer,
+    footerNav,
+    countdownInterval = null;
 
-// Initialisierung
+// Initialisieren nach DOM-Load
 document.addEventListener('DOMContentLoaded', () => {
-  // Refs holen
-  mainVideo         = document.getElementById('mainVideo');
-  videoSource       = document.getElementById('videoSource');
-  countdownContainer= document.getElementById('countdownContainer');
-  countdownTimer    = document.getElementById('countdownTimer');
-  footerNav         = document.getElementById('footerNav');
+  mainVideo          = document.getElementById('mainVideo');
+  countdownContainer = document.getElementById('countdownContainer');
+  countdownTimer     = document.getElementById('countdownTimer');
+  footerNav          = document.getElementById('footerNav');
 
-  // Video-Quelle setzen und laden
-  videoSource.src = config.videoSrc;
+  // Video-Quelle **direkt** setzen
+  mainVideo.src = config.videoSrc;
+  // Laden damit MIME & CORS geprüft werden
   mainVideo.load();
 
-  // Footer-Buttons erzeugen
-  for (const btn of config.footers) {
+  // Footer-Buttons generieren
+  config.footers.forEach(btn => {
     const b = document.createElement('button');
-    b.textContent        = btn.label;
-    b.dataset.time       = btn.time;
-    b.onclick            = () => {
+    b.textContent    = btn.label;
+    b.dataset.time   = btn.time;
+    b.onclick        = () => {
       stopAll();
       showVideoSection();
       playVideoAt(btn.time);
       highlightFooter(btn.time);
     };
     footerNav.appendChild(b);
-  }
+  });
 
-  // Einmalig Konfetti beim ersten Play-Event
+  // Einmalig: Konfetti beim ersten Play
   mainVideo.addEventListener('play', () => {
     confetti({ particleCount:150, spread:60, origin:{ y:0.6 } });
   }, { once:true });
@@ -83,7 +82,7 @@ function startPresentation(delaySec) {
   }
 }
 
-// Countdown-Funktion (Gong bei 2 s vor Ende)
+// Countdown mit Gong bei 2 s
 function runCountdown(sec, callback) {
   let rem = sec;
   countdownTimer.textContent = formatTime(rem);
@@ -102,28 +101,28 @@ function runCountdown(sec, callback) {
   }, 1000);
 }
 
-// --- 5) Video-Section & Footer einblenden ---
+// --- 5) Video-Section & Footer anzeigen ---
 function showVideoSection() {
   document.getElementById('startSection').classList.add('hidden');
   document.getElementById('videoSection').classList.remove('hidden');
   footerNav.classList.remove('hidden');
 }
 
-// --- 6) Video steuern & Footer hervorheben ---
+// --- 6) Video starten & Footer hervorheben ---
 function playVideoAt(sec) {
   mainVideo.currentTime = sec;
   mainVideo.play().catch(console.warn);
 }
 
 function highlightFooter(sec) {
-  for (const b of footerNav.children) {
+  Array.from(footerNav.children).forEach(b => {
     b.classList.toggle('active', Number(b.dataset.time) === sec);
-  }
+  });
 }
 
-// --- 7) Utility: Sekunden → "MM:SS" ---
+// --- 7) Utility: mm:ss ---
 function formatTime(total) {
-  const m = String(Math.floor(total / 60)).padStart(2,'0');
-  const s = String(total % 60).padStart(2,'0');
+  const m = String(Math.floor(total/60)).padStart(2,'0');
+  const s = String(total%60).padStart(2,'0');
   return `${m}:${s}`;
 }
