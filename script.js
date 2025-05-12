@@ -1,41 +1,40 @@
-// --- 1) Konfiguration ---
+// 1) Konfiguration
 const config = {
-  // Kann lokal (z.B. 'video1.mp4') oder extern sein:
   videoSrc: 'https://ebildungslabor.de/slides/video.mp4',
-  // Footer-Buttons springen auf diese Zeitpunkte (in Sekunden)
   footers: [
     { label: 'Minute 1', time: 60 },
     { label: 'Minute 2', time: 120 },
     { label: 'Minute 3', time: 180 }
   ]
-  // Overlays / Interaktionen fügen wir später hier hinzu
+  // overlays später hier ergänzen...
 };
 
-// --- 2) State & DOM-Refs ---
-let countdownInterval = null;
-let mainVideo, videoSource,
+// 2) State & Refs
+let mainVideo,
     countdownContainer, countdownTimer,
-    footerNav;
+    footerNav,
+    overlayEl, overlayContent,
+    countdownInterval = null;
 
-// Nach Laden des DOM initialisieren
+// 3) Init
 document.addEventListener('DOMContentLoaded', () => {
-  // Refs
-  mainVideo         = document.getElementById('mainVideo');
-  videoSource       = document.getElementById('videoSource');
-  countdownContainer= document.getElementById('countdownContainer');
-  countdownTimer    = document.getElementById('countdownTimer');
-  footerNav         = document.getElementById('footerNav');
+  mainVideo          = document.getElementById('mainVideo');
+  countdownContainer = document.getElementById('countdownContainer');
+  countdownTimer     = document.getElementById('countdownTimer');
+  footerNav          = document.getElementById('footerNav');
+  overlayEl          = document.getElementById('videoOverlay');
+  overlayContent     = document.getElementById('overlayContent');
 
-  // Video-Quelle setzen & laden
-  videoSource.src = config.videoSrc;
+  // **Wichtig**: Video-URL direkt am <video> setzen
+  mainVideo.src = config.videoSrc;
   mainVideo.load();
 
-  // Footer-Buttons generieren
+  // Footer Buttons
   for (const btn of config.footers) {
     const b = document.createElement('button');
-    b.textContent      = btn.label;
-    b.dataset.time     = btn.time;
-    b.onclick          = () => {
+    b.textContent  = btn.label;
+    b.dataset.time = btn.time;
+    b.onclick      = () => {
       stopAll();
       showVideoSection();
       playVideoAt(btn.time);
@@ -47,29 +46,22 @@ document.addEventListener('DOMContentLoaded', () => {
   // Einmalig Konfetti beim ersten Play
   mainVideo.addEventListener('play', () => {
     confetti({ particleCount:150, spread:60, origin:{ y:0.6 } });
-  }, { once: true });
+  }, { once:true });
 });
 
-// --- 3) Helfer: Prozesse stoppen ---
+// 4) Stoppe alle Prozesse
 function stopAll() {
-  // Countdown anhalten
-  if (countdownInterval) {
-    clearInterval(countdownInterval);
-    countdownInterval = null;
-  }
-  // Video pausieren
-  if (!mainVideo.paused) {
-    mainVideo.pause();
-  }
+  if (countdownInterval) clearInterval(countdownInterval);
+  countdownContainer.classList.add('hidden');
+  if (!mainVideo.paused) mainVideo.pause();
+  overlayEl.classList.remove('active');
 }
 
-// --- 4) Start-Logik mit Countdown ---
+// 5) Start-Flow
 function startPresentation(delaySec) {
   stopAll();
-  // Auswahl verbergen, Countdown einblenden
   document.getElementById('selectionContainer').classList.add('hidden');
   countdownContainer.classList.remove('hidden');
-
   if (delaySec > 0) {
     runCountdown(delaySec, () => {
       countdownContainer.classList.add('hidden');
@@ -83,8 +75,7 @@ function startPresentation(delaySec) {
   }
 }
 
-// Countdown-Funktion (Gong bei 2 s)
-function runCountdown(sec, onFinish) {
+function runCountdown(sec, cb) {
   let rem = sec;
   countdownTimer.textContent = formatTime(rem);
   countdownInterval = setInterval(() => {
@@ -93,35 +84,34 @@ function runCountdown(sec, onFinish) {
     if (rem < 0) {
       clearInterval(countdownInterval);
       countdownInterval = null;
-      onFinish();
+      cb();
     } else {
       countdownTimer.textContent = formatTime(rem);
     }
   }, 1000);
 }
 
-// --- 5) Video-Section anzeigen & Footer aktivieren ---
+// 6) Video & Footer
 function showVideoSection() {
   document.getElementById('startSection').classList.add('hidden');
   document.getElementById('videoSection').classList.remove('hidden');
   footerNav.classList.remove('hidden');
 }
 
-// --- 6) Video steuern & Footer hervorheben ---
-function playVideoAt(seconds) {
-  mainVideo.currentTime = seconds;
+function playVideoAt(sec) {
+  mainVideo.currentTime = sec;
   mainVideo.play().catch(console.warn);
 }
 
 function highlightFooter(sec) {
-  for (const btn of footerNav.children) {
-    btn.classList.toggle('active', Number(btn.dataset.time) === sec);
+  for (const b of footerNav.children) {
+    b.classList.toggle('active', Number(b.dataset.time) === sec);
   }
 }
 
-// Hilfsfunktion: Sekunden → "MM:SS"
-function formatTime(total) {
-  const m = String(Math.floor(total/60)).padStart(2,'0');
-  const s = String(total % 60).padStart(2,'0');
-  return `${m}:${s}`;
+// 7) Utility
+function formatTime(s) {
+  const m = String(Math.floor(s/60)).padStart(2,'0');
+  const ss= String(s%60).padStart(2,'0');
+  return `${m}:${ss}`;
 }
