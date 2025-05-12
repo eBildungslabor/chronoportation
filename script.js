@@ -7,24 +7,32 @@ const config = {
     { label: 'Minute 3', time: 180 }
   ],
   overlays: [
-    // Bild bei 0:20 für 10s, Video läuft weiter
-    { time: 20, duration:10, type:'image', src:'bild1.jpg', pauseVideo:false },
-    // Countdown bei 0:50 für 60s, Video stoppt
+    // Bild-Overlay bei 0:20 für 10 s, Video läuft weiter
+    { time: 20,  duration: 10, type: 'image',    src: 'bild1.jpg', pauseVideo: false },
+    // Countdown-Overlay bei 0:50 für 60 s, Video pausiert
     {
-      time: 50,
-      duration: 60,
-      type: 'countdown',
-      text: 'Gleich ist die Austauschzeit abgelaufen!',
+      time:       50,
+      duration:   60,
+      type:       'countdown',
+      text:       'Tausche dich mit Nebensitzer für eine Minute aus!',
       pauseVideo: true
     }
   ]
 };
 
-// --- 2) DOM-Refs & Initialisierung ---
-let mainVideo, countdownEl, cdTimer, footerNav, overlayEl, overlayContent;
-let _overlayIndex = 0;
+// --- 2) State & DOM-Refs ---
+let mainVideo,
+    countdownEl, cdTimer,
+    footerNav,
+    overlayEl, overlayContent;
+
+let countdownInterval = null;
+let overlayTimeoutId   = null;
+let overlayCountdownId = null;
+let _overlayIndex      = 0;
 
 document.addEventListener('DOMContentLoaded', () => {
+  // DOM-Referenzen
   mainVideo      = document.getElementById('mainVideo');
   countdownEl    = document.getElementById('countdown');
   cdTimer        = document.getElementById('cdTimer');
@@ -35,74 +43,86 @@ document.addEventListener('DOMContentLoaded', () => {
   // Video-Quelle setzen
   mainVideo.src = config.videoSrc;
 
-  // Footer-Buttons erzeugen
+  // Footer-Buttons generieren
   for (const btn of config.footers) {
     const b = document.createElement('button');
     b.textContent = btn.label;
-    b.onclick = () => seekTo(btn.time);
+    b.onclick     = () => seekTo(btn.time);
     footerNav.appendChild(b);
   }
 
   // Overlay-Trigger
   mainVideo.addEventListener('timeupdate', checkOverlays);
 
-  // 1× Konfetti beim ersten Abspielen
+  // 1× Konfetti beim ersten Play
   mainVideo.addEventListener('play', () => {
-    confetti({ particleCount:150, spread:60, origin:{y:0.6} });
-  }, { once:true });
+    confetti({ particleCount: 150, spread: 60, origin: { y: 0.6 } });
+  }, { once: true });
 });
 
-// --- 3) Presentation-Steuerung ---  
+// --- 3) Stoppe alle Prozesse beim Neuanfang ---
+function stopAll() {
+  // Stoppe Start-Countdown
+  if (countdownInterval) clearInterval(countdownInterval);
+  countdownEl.classList.add('hidden');
+
+  // Stoppe Video
+  if (!mainVideo.paused) mainVideo.pause();
+
+  // Stoppe Overlay-Timer
+  if (overlayTimeoutId) clearTimeout(overlayTimeoutId);
+  if (overlayCountdownId) clearInterval(overlayCountdownId);
+
+  // Overlay verbergen & zurücksetzen
+  overlayEl.classList.remove('active');
+  _overlayIndex = 0;
+}
+
+// --- 4) Start-Präsentation / Countdown ---
 function startPresentation(seconds) {
-  // UI wechseln
+  stopAll();
   document.getElementById('startSection').classList.add('hidden');
   document.getElementById('videoSection').classList.remove('hidden');
   footerNav.classList.remove('hidden');
 
-  // Countdown oder direkt Video
   if (seconds > 0) {
     countdownEl.classList.remove('hidden');
     startCountdown(seconds, () => {
       countdownEl.classList.add('hidden');
-      playVideo();
+      playVideo(0);
     });
   } else {
-    playVideo();
+    playVideo(0);
   }
 }
 
-// Countdown mit Gong bei 2s
-function startCountdown(sec, callback) {
+function startCountdown(sec, onEnd) {
   let rem = sec;
   cdTimer.textContent = formatTime(rem);
-  const iv = setInterval(() => {
+  countdownInterval = setInterval(() => {
     rem--;
     if (rem === 2) new Audio('gong.mp3').play().catch(console.warn);
     if (rem < 0) {
-      clearInterval(iv);
-      callback();
+      clearInterval(countdownInterval);
+      onEnd();
     } else {
       cdTimer.textContent = formatTime(rem);
     }
   }, 1000);
 }
 
-// Video starten
-function playVideo() {
-  mainVideo.currentTime = 0;
+// --- 5) Video-Steuerung & Footer-Jump ---
+function playVideo(startTime) {
+  mainVideo.currentTime = startTime;
   mainVideo.play().catch(console.warn);
 }
 
-// Auf Footer-Seek
 function seekTo(sec) {
-  mainVideo.currentTime = sec;
-  mainVideo.play().catch(console.warn);
-  // Reset Overlays
-  overlayEl.classList.remove('active');
-  _overlayIndex = 0;
+  stopAll();
+  playVideo(sec);
 }
 
-// --- 4) Overlay-Logik ---  
+// --- 6) Overlay-Logik ---
 function checkOverlays() {
   if (_overlayIndex >= config.overlays.length) return;
   const o = config.overlays[_overlayIndex];
@@ -113,16 +133,14 @@ function checkOverlays() {
 }
 
 function showOverlay(o) {
+  // Inhalt vorbereiten
   overlayContent.innerHTML = '';
-
-  // Inhalt einfügen
   if (o.type === 'image') {
     const img = document.createElement('img');
     img.src = o.src;
     img.style.maxWidth  = '80%';
     img.style.maxHeight = '80%';
     overlayContent.appendChild(img);
-
   } else if (o.type === 'countdown') {
     const cont = document.createElement('div');
     cont.innerHTML = `
@@ -132,7 +150,7 @@ function showOverlay(o) {
     overlayContent.appendChild(cont);
   }
 
-  // anzeigen & Video ggf. stoppen
+  // Overlay zeigen & ggf. Video pausieren
   overlayEl.classList.add('active');
   if (o.pauseVideo) mainVideo.pause();
 
@@ -140,26 +158,25 @@ function showOverlay(o) {
   if (o.type === 'countdown') {
     let rem = o.duration;
     const tm = document.getElementById('overlayTimer');
-    const iv2 = setInterval(() => {
+    overlayCountdownId = setInterval(() => {
       rem--;
       if (rem === 2) new Audio('gong.mp3').play().catch(console.warn);
       tm.textContent = formatTime(rem);
       if (rem <= 0) {
-        clearInterval(iv2);
+        clearInterval(overlayCountdownId);
         overlayEl.classList.remove('active');
         if (o.pauseVideo) mainVideo.play().catch(console.warn);
       }
     }, 1000);
-
   } else {
-    setTimeout(() => {
+    overlayTimeoutId = setTimeout(() => {
       overlayEl.classList.remove('active');
       if (o.pauseVideo) mainVideo.play().catch(console.warn);
     }, o.duration * 1000);
   }
 }
 
-// --- Utility: mm:ss ---
+// --- 7) Utility: mm:ss ---
 function formatTime(s) {
   const m   = String(Math.floor(s/60)).padStart(2,'0');
   const sec = String(s%60).padStart(2,'0');
