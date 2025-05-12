@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1.0">
   <title>Interaktive Präsentation</title>
   <link rel="stylesheet" href="styles.css">
+  <!-- Confetti -->
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
   <script src="script.js" defer></script>
 </head>
@@ -26,22 +27,19 @@
   </section>
 
   <!-- 2) VIDEO-SCREEN -->
-<!-- 2) VIDEO-SCREEN -->
-<section id="videoSection" class="hidden">
-  <div class="video-wrapper">
-    <video
-      id="mainVideo"
-      src=""
-      controls
-      playsinline
-      crossorigin="anonymous"
-    >
-      Dein Browser unterstützt das Video-Tag nicht.
-    </video>
-    <div id="videoOverlay" class="overlay"></div>
-  </div>
-</section>
-
+  <section id="videoSection" class="hidden">
+    <div class="video-wrapper">
+      <video
+        id="mainVideo"
+        controls
+        playsinline
+        crossorigin="anonymous"
+      >
+        <source id="videoSource" src="" type="video/mp4">
+        Dein Browser unterstützt das Video-Tag nicht.
+      </video>
+    </div>
+  </section>
 
   <!-- 3) FOOTER -->
   <nav id="footerNav" class="hidden"></nav>
