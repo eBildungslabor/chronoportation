@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1.0">
   <title>Interaktive Präsentation</title>
   <link rel="stylesheet" href="styles.css">
-  <!-- Confetti -->
+  <!-- Konfetti -->
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
   <script src="script.js" defer></script>
 </head>
@@ -29,15 +29,18 @@
   <!-- 2) VIDEO-SCREEN -->
   <section id="videoSection" class="hidden">
     <div class="video-wrapper">
-      <!-- Video-Tag mit src leer; wir setzen es per JS -->
       <video
         id="mainVideo"
         src=""
         controls
         playsinline
+        crossorigin="anonymous"
       >
         Dein Browser unterstützt das Video-Tag nicht.
       </video>
+      <div id="videoOverlay" class="overlay hidden">
+        <div id="overlayContent"></div>
+      </div>
     </div>
   </section>
 
