@@ -36,7 +36,7 @@ html, body {
   font-size: 1rem;
   cursor: pointer;
 }
-#countdown {
+#countdownContainer {
   margin-top: 2rem;
   font-size: 1.5rem;
 }
@@ -61,7 +61,7 @@ html, body {
   object-fit: cover;
 }
 
-/* OVERLAY */
+/* OVERLAY (hier nur für spätere Erweiterung) */
 .overlay {
   position: absolute;
   top: 0; left: 0;
@@ -76,26 +76,7 @@ html, body {
   color: #fff;
   z-index: 2;
 }
-.overlay.active {
-  display: flex;
-}
-.overlay h1 {
-  font-size: 4vw;
-  margin-bottom: 1rem;
-}
-.overlay .timer {
-  font-size: 3vw;
-}
-.countdown-large {
-  font-size: 6vw;
-  font-weight: bold;
-}
-.blink {
-  animation: blink 1s steps(2, start) infinite;
-}
-@keyframes blink {
-  to { visibility: hidden; }
-}
+.overlay.active { display: flex; }
 
 /* FOOTER */
 #footerNav {
