@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1.0">
-  <title>Remix-Vortrag</title>
+  <title>Gemeinsam KI erkunden</title>
   <link rel="stylesheet" href="styles.css">
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
   <script src="script.js" defer></script>
@@ -13,11 +13,13 @@
   <!-- 1) START-SCREEN -->
   <section id="startSection">
     <h1>Wann starten?</h1>
-    <button onclick="startPresentation(900)">In 15 Min</button>
-    <button onclick="startPresentation(300)">In 5 Min</button>
-    <button onclick="startPresentation(180)">In 3 Min</button>
-    <button onclick="startPresentation(60)">In 1 Min</button>
-    <button onclick="startPresentation(0)">Sofort</button>
+    <div id="selectionContainer">
+      <button onclick="startPresentation(900)">In 15 Min</button>
+      <button onclick="startPresentation(300)">In 5 Min</button>
+      <button onclick="startPresentation(180)">In 3 Min</button>
+      <button onclick="startPresentation(60)">In 1 Min</button>
+      <button onclick="startPresentation(0)">Sofort</button>
+    </div>
     <div id="countdown" class="hidden">
       <h2>Start in <span id="cdTimer">00:00</span></h2>
     </div>
@@ -26,7 +28,7 @@
   <!-- 2) VIDEO-SCREEN -->
   <section id="videoSection" class="hidden">
     <div class="video-wrapper">
-      <video id="mainVideo" playsinline controls></video>
+      <video id="mainVideo" playsinline controls crossOrigin="anonymous"></video>
       <div id="videoOverlay" class="overlay">
         <div id="overlayContent"></div>
       </div>
